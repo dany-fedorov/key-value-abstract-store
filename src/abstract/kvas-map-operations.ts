@@ -15,7 +15,7 @@ import type {
   KvasTypeParameters,
 } from './kvas-types';
 import { KvasValueType } from './kvas-types';
-import { KvasError } from './kvas-error';
+import { KvasErrors } from './kvas-errors';
 
 export type KvasMapOperationsToObjectResult<JSM> = {
   object: JSM;
@@ -47,6 +47,20 @@ export type KvasMapOperationsQueryResult<
   };
 };
 
+/**
+ * Optional abstract methods
+ */
+export interface KvasMapOperations<
+  KM extends KvasMap<KvasTypeParameters>,
+  JSM = unknown,
+> {
+  fromJs?(jsMap: JSM): KvasSyncOrPromiseResult<KM>;
+
+  toJs?(
+    kvasMap: KM,
+  ): KvasSyncOrPromiseResult<KvasMapOperationsToObjectResult<JSM>>;
+}
+
 export abstract class KvasMapOperations<
   KM extends KvasMap<KvasTypeParameters>,
   JSM = unknown,
@@ -54,12 +68,6 @@ export abstract class KvasMapOperations<
   abstract createMap(
     options?: CreateMapOptions<KM>,
   ): KvasSyncOrPromiseResult<KM>;
-
-  abstract fromJs(jsMap: JSM): KvasSyncOrPromiseResult<KM>;
-
-  abstract toJs(
-    kvasMap: KM,
-  ): KvasSyncOrPromiseResult<KvasMapOperationsToObjectResult<JSM>>;
 
   queryPath(
     map: KM,
@@ -248,7 +256,7 @@ export abstract class KvasMapOperations<
   ): KvasSyncOrPromiseResult<KvasMapOperationsSetResult> {
     const sync = () => {
       if (path.length === 0) {
-        throw new KvasError('Cannot set in []');
+        throw new KvasErrors('Cannot set in []');
       }
       const { lastFoundMapProp } = (
         this.queryPath(map, path) as KvasSyncResult<

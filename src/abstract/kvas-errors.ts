@@ -1,10 +1,10 @@
 export interface KvasErrorConstructor {
-  new (message?: string): KvasError;
+  new (message?: string): KvasErrors;
 
-  readonly prototype: KvasError;
+  readonly prototype: KvasErrors;
 }
 
-export class KvasError extends Error {
+export class KvasErrors extends Error {
   constructor(...args: ConstructorParameters<ErrorConstructor>) {
     super(...args);
   }

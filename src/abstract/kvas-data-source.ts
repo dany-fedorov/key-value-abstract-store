@@ -11,7 +11,7 @@ import type {
   KvasSyncResult,
   KvasTypeParameters,
 } from './kvas-types';
-import { KvasError } from './kvas-error';
+import { KvasErrors } from './kvas-errors';
 
 type KvasDataSourceGetResult<KM extends KvasMap<KvasTypeParameters>> =
   KvasMapOperationsGetResult<KM>;
@@ -47,7 +47,7 @@ export class KvasDataSource<KM extends KvasMap<KvasTypeParameters>> {
 
   private validateInitialized(): void {
     if (this.rootMap === null) {
-      throw new KvasError('KvasDataSource is not initialized');
+      throw new KvasErrors('KvasDataSource is not initialized');
     }
   }
 
