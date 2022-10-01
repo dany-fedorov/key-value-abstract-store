@@ -1,0 +1,23 @@
+# source
+**/*.ts
+*.ts
+!**/*.d.ts
+!*.d.ts
+
+.idea/
+/.vscode
+/tests
+.gitignore
+.prettierrc
+.eslintrc.js
+.eslintignore
+node_modules/
+tsconfig.json
+tsconfig.build.json
+webpack.config.js
+**/*.md
+!README.md
+/coverage
+**/*.test.ts.snap
+/__tests__
+
