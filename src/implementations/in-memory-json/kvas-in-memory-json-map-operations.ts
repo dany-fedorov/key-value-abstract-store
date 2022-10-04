@@ -1,37 +1,29 @@
-import type {
-  JsonArray,
-  JsonObject,
-  JsonPrimitive,
-  JsonValue,
-} from './kvas-in-memory-json-types';
-import {
-  KvasMapOperations,
-  KvasMapOperationsToObjectResult,
-} from '../../abstract/kvas-map-operations';
-import type { CreateMapOptions } from '../../abstract/kvas-map-operations';
+import type { JsonPrimitive } from './kvas-in-memory-json-types';
+import { KvasMapOperations } from '../../core/kvas-map-operations';
+import type { CreateMapOptions } from '../../core/kvas-map-operations';
 import type {
   KvasInMemoryJsonMapHost,
   KvasInMemoryJsonMapInstanceConfigInput,
-} from './kvas-in-memory-json-map';
-import { KvasInMemoryJsonMap } from './kvas-in-memory-json-map';
-import type { KvasSyncOrPromiseResult } from '../../abstract/kvas-types';
+} from './kvas-in-memory-json-map-base';
+import { KvasInMemoryJsonMapBase } from './kvas-in-memory-json-map-base';
+import type { KvasSyncOrPromiseResult } from '../../core/kvas-types';
 
 export class KvasInMemoryJsonMapOperations<
   P extends JsonPrimitive,
   JSM = KvasInMemoryJsonMapHost<P>,
-> extends KvasMapOperations<KvasInMemoryJsonMap<P>, JSM> {
+> extends KvasMapOperations<KvasInMemoryJsonMapBase<P>, JSM> {
   createMap(
-    options?: CreateMapOptions<KvasInMemoryJsonMap<P>>,
+    options?: CreateMapOptions<KvasInMemoryJsonMapBase<P>>,
     inMemoryJsonMapInstanceConfig?: KvasInMemoryJsonMapInstanceConfigInput<P>,
-  ): KvasSyncOrPromiseResult<KvasInMemoryJsonMap<P>> {
+  ): KvasSyncOrPromiseResult<KvasInMemoryJsonMapBase<P>> {
     const sync = () => {
       if (typeof options?.forKey === 'number') {
-        return new KvasInMemoryJsonMap<P>({
+        return new KvasInMemoryJsonMapBase<P>({
           ...(inMemoryJsonMapInstanceConfig || {}),
           host: [],
         });
       } else {
-        return new KvasInMemoryJsonMap<P>({
+        return new KvasInMemoryJsonMapBase<P>({
           ...(inMemoryJsonMapInstanceConfig || {}),
           host: {},
         });

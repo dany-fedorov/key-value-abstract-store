@@ -1,13 +1,13 @@
 import type {
-  KvasMap,
+  KvasMapBase,
   KvasMapDeleteKeyResult,
   KvasMapGetKeyResult,
   KvasMapSetKeyResult,
-} from '../../abstract/kvas-map';
-import type { KvasSyncOrPromiseResult } from '../../abstract/kvas-types';
-import { KvasValueType } from '../../abstract/kvas-types';
-import type { KvasErrorConstructor } from '../../abstract/kvas-errors';
-import { KvasErrors } from '../../abstract/kvas-errors';
+} from '../../core/kvas-map-base';
+import type { KvasSyncOrPromiseResult } from '../../core/kvas-types';
+import { KvasValueType } from '../../core/kvas-types';
+import type { KvasErrorConstructor } from '../../core/kvas-errors';
+import { KvasErrors } from '../../core/kvas-errors';
 import type {
   JsonArray,
   JsonObject,
@@ -74,7 +74,11 @@ export class KvasInMemoryJsonHostAndKeyAreIncompatibleError extends KvasInMemory
 export function getValueTypeForKvasInMemoryJsonDefault(
   x: unknown,
 ): KvasValueType | undefined {
-  if (typeof x === 'object' && x !== null && x instanceof KvasInMemoryJsonMap) {
+  if (
+    typeof x === 'object' &&
+    x !== null &&
+    x instanceof KvasInMemoryJsonMapBase
+  ) {
     return KvasValueType.MAP;
   } else if (['boolean', 'string', 'number'].includes(typeof x) || x === null) {
     return KvasValueType.PRIMITIVE;
@@ -83,8 +87,8 @@ export function getValueTypeForKvasInMemoryJsonDefault(
   }
 }
 
-export class KvasInMemoryJsonMap<P extends JsonPrimitive>
-  implements KvasMap<KvasInMemoryJsonTypeParameters<P>>
+export class KvasInMemoryJsonMapBase<P extends JsonPrimitive>
+  implements KvasMapBase<KvasInMemoryJsonTypeParameters<P>>
 {
   readonly instanceConfig: KvasInMemoryJsonMapInstanceConfigMixin<P>['instanceConfig'];
 
@@ -137,7 +141,7 @@ export class KvasInMemoryJsonMap<P extends JsonPrimitive>
   getKey(
     key: KvasInMemoryJsonTypeParameters<P>['Key'],
   ): KvasSyncOrPromiseResult<KvasMapGetKeyResult<this>> {
-    const sync: () => KvasMapGetKeyResult<KvasInMemoryJsonMap<P>> = () => {
+    const sync: () => KvasMapGetKeyResult<KvasInMemoryJsonMapBase<P>> = () => {
       const { host, options } = this.instanceConfig;
       if (
         !isKeyCompatibleWithHost(host, key) &&
@@ -161,7 +165,7 @@ export class KvasInMemoryJsonMap<P extends JsonPrimitive>
     key: KvasInMemoryJsonTypeParameters<P>['Key'],
     value:
       | KvasInMemoryJsonTypeParameters<P>['PrimitiveValue']
-      | KvasMap<KvasInMemoryJsonTypeParameters<P>>,
+      | KvasMapBase<KvasInMemoryJsonTypeParameters<P>>,
   ): KvasSyncOrPromiseResult<KvasMapSetKeyResult> {
     const sync: () => KvasMapSetKeyResult = () => {
       const { host, options } = this.instanceConfig;

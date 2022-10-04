@@ -1,4 +1,7 @@
-import type { KvasMap, KvasTypeParametersFromKvasMap } from './kvas-map';
+import type {
+  KvasMapBase,
+  KvasTypeParametersFromKvasMap,
+} from './kvas-map-base';
 import type {
   KvasMapOperationsDeleteResult,
   KvasMapOperationsGetResult,
@@ -13,16 +16,16 @@ import type {
 } from './kvas-types';
 import { KvasErrors } from './kvas-errors';
 
-type KvasDataSourceGetResult<KM extends KvasMap<KvasTypeParameters>> =
+type KvasDataSourceGetResult<KM extends KvasMapBase<KvasTypeParameters>> =
   KvasMapOperationsGetResult<KM>;
 type KvasDataSourceSetResult = KvasMapOperationsSetResult;
 type KvasDataSourceDeleteResult = KvasMapOperationsDeleteResult;
 
-type KvasDataSourceConfig<KM extends KvasMap<KvasTypeParameters>> = {
+type KvasDataSourceConfig<KM extends KvasMapBase<KvasTypeParameters>> = {
   operations: KvasMapOperations<KM>;
 };
 
-export class KvasDataSource<KM extends KvasMap<KvasTypeParameters>> {
+export class KvasDataSource<KM extends KvasMapBase<KvasTypeParameters>> {
   protected readonly config: KvasDataSourceConfig<KM>;
   rootMap: KM | null = null;
 
@@ -34,7 +37,7 @@ export class KvasDataSource<KM extends KvasMap<KvasTypeParameters>> {
     const sync = () => {
       this.rootMap = (
         this.config.operations.createMap({
-          asDataStoreRoot: true,
+          asDataSourceRoot: true,
         }) as KvasSyncResult<KM>
       ).sync();
     };

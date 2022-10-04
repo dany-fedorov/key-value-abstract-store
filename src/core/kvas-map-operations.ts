@@ -1,13 +1,13 @@
 import type {
   KvasKeyFromKvasMap,
-  KvasMap,
+  KvasMapBase,
   KvasMapDeleteKeyResult,
   KvasMapGetKeyResult,
   KvasMapSetKeyResult,
   KvasPrimitiveValueFromKvasMap,
   KvasProp,
   KvasTypeParametersFromKvasMap,
-} from './kvas-map';
+} from './kvas-map-base';
 import type {
   KvasPath,
   KvasSyncOrPromiseResult,
@@ -21,22 +21,23 @@ export type KvasMapOperationsToObjectResult<JSM> = {
   object: JSM;
 };
 
-export type KvasMapOperationsGetResult<KM extends KvasMap<KvasTypeParameters>> =
-  {
-    prop: KvasProp<KM>;
-  };
+export type KvasMapOperationsGetResult<
+  KM extends KvasMapBase<KvasTypeParameters>,
+> = {
+  prop: KvasProp<KM>;
+};
 
 export type KvasMapOperationsSetResult = KvasMapSetKeyResult;
 
 export type KvasMapOperationsDeleteResult = KvasMapDeleteKeyResult;
 
-export type CreateMapOptions<KM extends KvasMap<KvasTypeParameters>> = {
+export type CreateMapOptions<KM extends KvasMapBase<KvasTypeParameters>> = {
   forKey?: KvasKeyFromKvasMap<KM>;
-  asDataStoreRoot?: boolean;
+  asDataSourceRoot?: boolean;
 };
 
 export type KvasMapOperationsQueryResult<
-  KM extends KvasMap<KvasTypeParameters>,
+  KM extends KvasMapBase<KvasTypeParameters>,
 > = {
   prop: KvasProp<KM> | undefined;
   lastFoundProp: KvasProp<KM>;
@@ -51,7 +52,7 @@ export type KvasMapOperationsQueryResult<
  * Optional abstract methods
  */
 export interface KvasMapOperations<
-  KM extends KvasMap<KvasTypeParameters>,
+  KM extends KvasMapBase<KvasTypeParameters>,
   JSM = unknown,
 > {
   fromJs?(jsMap: JSM): KvasSyncOrPromiseResult<KM>;
@@ -62,7 +63,7 @@ export interface KvasMapOperations<
 }
 
 export abstract class KvasMapOperations<
-  KM extends KvasMap<KvasTypeParameters>,
+  KM extends KvasMapBase<KvasTypeParameters>,
   JSM = unknown,
 > {
   abstract createMap(
@@ -228,7 +229,7 @@ export abstract class KvasMapOperations<
       const { prop } = (
         this.queryPath(map, path) as KvasSyncResult<
           KvasMapOperationsQueryResult<
-            KvasMap<KvasTypeParametersFromKvasMap<KM>>
+            KvasMapBase<KvasTypeParametersFromKvasMap<KM>>
           >
         >
       ).sync();
@@ -261,7 +262,7 @@ export abstract class KvasMapOperations<
       const { lastFoundMapProp } = (
         this.queryPath(map, path) as KvasSyncResult<
           KvasMapOperationsQueryResult<
-            KvasMap<KvasTypeParametersFromKvasMap<KM>>
+            KvasMapBase<KvasTypeParametersFromKvasMap<KM>>
           >
         >
       ).sync();
@@ -273,7 +274,7 @@ export abstract class KvasMapOperations<
         lastFoundMapProp.path.length,
         path.length - 1,
       );
-      let curMap: KvasMap<KvasTypeParametersFromKvasMap<KM>> =
+      let curMap: KvasMapBase<KvasTypeParametersFromKvasMap<KM>> =
         lastFoundMapProp.value;
       pathToCreateMapsIn.forEach((pathSegment) => {
         const newMap = (
