@@ -1,7 +1,7 @@
 {
   "name": "key-value-abstract-store",
   "version": "0.0.1",
-  "description": "Very abstract nested key-value store.",
+  "description": "(WIP) Very abstract nested key-value store.",
   "main": "./lib/index.js",
   "scripts": {
     "test": "NODE_OPTIONS='--stack-trace-limit=1000' ./node_modules/.bin/jest",
