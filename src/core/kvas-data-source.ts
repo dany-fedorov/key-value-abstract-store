@@ -1,45 +1,68 @@
-import type {
-  KvasMapBase,
-  KvasTypeParametersFromKvasMap,
-} from './kvas-map-base';
+import type { KvasEMap, KvasMap } from '@core/kvas-map';
 import type {
   KvasMapOperationsDeleteResult,
   KvasMapOperationsGetResult,
   KvasMapOperationsSetResult,
   KvasMapOperations,
-} from './kvas-map-operations';
+  KvasMapOperationsGetJsObjectInPathResult,
+  KvasMapOperationsSetJsObjectInPathResult,
+  CreateMapOptions,
+} from '@core/kvas-map-operations';
 import type {
   KvasPath,
   KvasSyncOrPromiseResult,
   KvasSyncResult,
   KvasTypeParameters,
-} from './kvas-types';
-import { KvasErrors } from './kvas-errors';
+} from '@core/kvas-types';
+import { KvasError } from '@core/kvas-errors';
 
-type KvasDataSourceGetResult<KM extends KvasMapBase<KvasTypeParameters>> =
-  KvasMapOperationsGetResult<KM>;
-type KvasDataSourceSetResult = KvasMapOperationsSetResult;
-type KvasDataSourceDeleteResult = KvasMapOperationsDeleteResult;
+export type KvasDataSourceGetResult<
+  KTP extends KvasTypeParameters,
+  KM = KvasMap<KTP>,
+> = KvasMapOperationsGetResult<KTP, KM>;
+export type KvasDataSourceSetResult = KvasMapOperationsSetResult;
+export type KvasDataSourceDeleteResult = KvasMapOperationsDeleteResult;
 
-type KvasDataSourceConfig<KM extends KvasMapBase<KvasTypeParameters>> = {
-  operations: KvasMapOperations<KM>;
+export type KvasDataSourceConfig<KTP extends KvasTypeParameters> = {
+  operations: KvasMapOperations<KTP>;
 };
 
-export class KvasDataSource<KM extends KvasMapBase<KvasTypeParameters>> {
-  protected readonly config: KvasDataSourceConfig<KM>;
+export type KvasDataSourceGetJsObjectResult<
+  KTP extends KvasTypeParameters,
+  JSO = unknown,
+> = KvasMapOperationsGetJsObjectInPathResult<KTP, JSO>;
+
+export type KvasDataSourceSetJsObjectResult =
+  KvasMapOperationsSetJsObjectInPathResult;
+
+export type KvasDataSourceInitializeOptions<
+  KTP extends KvasTypeParameters,
+  JSO,
+> = Pick<CreateMapOptions<KTP, JSO>, 'fromMap' | 'fromJsObject'>;
+
+export class KvasDataSource<
+  KTP extends KvasTypeParameters,
+  JSO = unknown,
+  KM = KvasMap<KTP>,
+> {
+  protected readonly config: KvasDataSourceConfig<KTP>;
   rootMap: KM | null = null;
 
-  constructor(config: KvasDataSourceConfig<KM>) {
+  constructor(config: KvasDataSourceConfig<KTP>) {
     this.config = config;
   }
 
-  initialize(): KvasSyncOrPromiseResult<void> {
+  initialize(
+    options?: KvasDataSourceInitializeOptions<KTP, JSO>,
+  ): KvasSyncOrPromiseResult<void> {
     const sync = () => {
       this.rootMap = (
         this.config.operations.createMap({
           asDataSourceRoot: true,
-        }) as KvasSyncResult<KM>
+          ...(options || {}),
+        }) as unknown as KvasSyncResult<KM>
       ).sync();
+      // console.log({ rootMap: this.rootMap });
     };
     return {
       sync,
@@ -48,34 +71,69 @@ export class KvasDataSource<KM extends KvasMapBase<KvasTypeParameters>> {
     };
   }
 
-  private validateInitialized(): void {
-    if (this.rootMap === null) {
-      throw new KvasErrors('KvasDataSource is not initialized');
+  isInitialized(): boolean {
+    return this.rootMap !== null;
+  }
+
+  private checkIsInitialized(): void {
+    if (!this.isInitialized()) {
+      throw new KvasError('KvasDataSource is not initialized');
     }
   }
 
   get(
-    path: KvasPath<KvasTypeParametersFromKvasMap<KM>>,
-  ): KvasSyncOrPromiseResult<KvasDataSourceGetResult<KM>> {
-    this.validateInitialized();
+    path: KvasPath<KTP>,
+  ): KvasSyncOrPromiseResult<KvasDataSourceGetResult<KTP, KvasEMap<KTP, JSO>>> {
+    this.checkIsInitialized();
     const { operations } = this.config;
-    return operations.getInPath(this.rootMap as KM, path);
+    return operations.getInPath(this.rootMap as unknown as KvasMap<KTP>, path);
   }
 
   set(
-    path: KvasPath<KvasTypeParametersFromKvasMap<KM>>,
-    value: KvasTypeParametersFromKvasMap<KM>['PrimitiveValue'] | KM,
+    path: KvasPath<KTP>,
+    value: KTP['PrimitiveValue'] | KM,
   ): KvasSyncOrPromiseResult<KvasDataSourceSetResult> {
-    this.validateInitialized();
+    this.checkIsInitialized();
     const { operations } = this.config;
-    return operations.setInPath(this.rootMap as KM, path, value);
+    return operations.setInPath(
+      this.rootMap as unknown as KvasMap<KTP>,
+      path,
+      value,
+    );
   }
 
   delete(
-    path: KvasPath<KvasTypeParametersFromKvasMap<KM>>,
+    path: KvasPath<KTP>,
   ): KvasSyncOrPromiseResult<KvasDataSourceDeleteResult> {
-    this.validateInitialized();
+    this.checkIsInitialized();
     const { operations } = this.config;
-    return operations.deleteInPath(this.rootMap as KM, path);
+    return operations.deleteInPath(
+      this.rootMap as unknown as KvasMap<KTP>,
+      path,
+    );
+  }
+
+  getJsObject(
+    path: KvasPath<KTP>,
+  ): KvasSyncOrPromiseResult<KvasDataSourceGetJsObjectResult<KTP>> {
+    this.checkIsInitialized();
+    const { operations } = this.config;
+    return operations.getJsObjectInPath(
+      this.rootMap as unknown as KvasMap<KTP>,
+      path,
+    );
+  }
+
+  setJsObject(
+    path: KvasPath<KTP>,
+    jsObject: JSO,
+  ): KvasSyncOrPromiseResult<KvasDataSourceSetJsObjectResult> {
+    this.checkIsInitialized();
+    const { operations } = this.config;
+    return operations.setJsObjectInPath(
+      this.rootMap as unknown as KvasMap<KTP>,
+      path,
+      jsObject,
+    );
   }
 }

@@ -1,9 +1,7 @@
 {
-  "extends": "@tsconfig/node16-strictest/tsconfig.json",
   "compilerOptions": {
     "baseUrl": "./src",
     "outDir": "./dist",
-    "declaration": true,
     "paths": {
       "@core/*": [
         "core/*"
@@ -12,10 +10,5 @@
         "implementations/in-memory-json/*"
       ]
     }
-  },
-  "include": [
-    "src",
-    "tests",
-    "scripts"
-  ]
+  }
 }
