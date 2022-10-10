@@ -1,19 +1,19 @@
-import type {
-  JsonComposite,
-  JsonCompositeKey,
-  JsonCompositeUnconstrained,
-  JsonPrimitive,
-} from '@in-memory-json/kvas-in-memory-json-types';
-import type {
-  KvasInMemoryJsonKey,
-  KvasInMemoryJsonMapDataHost,
-} from '@in-memory-json/kvas-in-memory-json-map';
-import {
-  __REWRITE_OBJECT_DEFAULT_ROOT_KEY__,
-  rewriteObject,
-} from 'configurable-tree-traversal/tools/rewrite-object';
-import { KvasInMemoryJsonMap } from '@in-memory-json/kvas-in-memory-json-map';
-import { PRIMITIVE_TYPEOF_TYPES } from 'configurable-tree-traversal/traversable-tree-implementations/traversable-object-tree/lib/constants';
+// import type {
+//   JsonComposite,
+//   JsonCompositeKey,
+//   JsonCompositeUnconstrained,
+//   JsonPrimitive,
+// } from '@in-memory-json/kvas-in-memory-json-types';
+// import type {
+//   KvasInMemoryJsonKey,
+//   KvasInMemoryJsonMapDataHost,
+// } from '@in-memory-json/kvas-in-memory-json-map';
+// import {
+//   __REWRITE_OBJECT_DEFAULT_ROOT_KEY__,
+//   rewriteObject,
+// } from 'configurable-tree-traversal/tools/rewrite-object';
+// import { KvasInMemoryJsonMap } from '@in-memory-json/kvas-in-memory-json-map';
+// import { PRIMITIVE_TYPEOF_TYPES } from 'configurable-tree-traversal/traversable-tree-implementations/traversable-object-tree/lib/constants';
 
 const replacerFunc = () => {
   const visited = new WeakSet();
@@ -35,7 +35,7 @@ export const jsonStringifySafe = (
   return JSON.stringify(obj, replacerFunc(), indent);
 };
 
-export function dataObjectToKvasInMemoryJsonMapRecur<P extends JsonPrimitive>(
+/*export function dataObjectToKvasInMemoryJsonMapRecur<P extends JsonPrimitive>(
   dataObject: JsonComposite<P>,
 ): KvasInMemoryJsonMapDataHost<P> {
   const { outputObject } = rewriteObject<
@@ -124,4 +124,4 @@ export function kvasInMemoryJsonMapToDataObjectRecur<P extends JsonPrimitive>(
     },
   });
   return outputObject;
-}
+}*/
