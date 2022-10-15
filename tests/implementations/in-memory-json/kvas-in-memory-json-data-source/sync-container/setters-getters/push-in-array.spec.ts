@@ -7,7 +7,52 @@ it('should push to object selecting key automatically', () => {
   const { key: key1 } = ds.push(path, value);
   const { key: key2 } = ds.push(path, value + 2);
   const { key: key3 } = ds.push(path, value + 3);
-  expect({ key1, key2, key3 }).toMatchSnapshot();
-  expect(ds.getJSO(path)).toMatchSnapshot();
-  expect(ds).toMatchSnapshot();
+  expect({ key1, key2, key3 }).toMatchInlineSnapshot(`
+    Object {
+      "key1": 0,
+      "key2": 1,
+      "key3": 2,
+    }
+  `);
+  expect(ds.getJSO(path)).toMatchInlineSnapshot(`
+    Object {
+      "prop": Object {
+        "path": Array [
+          "b",
+          "c",
+        ],
+        "type": "map",
+        "value": Array [
+          "the-value",
+          "the-value2",
+          "the-value3",
+        ],
+      },
+    }
+  `);
+  expect(ds).toMatchInlineSnapshot(`
+    KvasDataSourceSyncContainer {
+      "dataSource": KvasInMemoryJsonDataSource {
+        "operations": KvasInMemoryJsonMapOperations {},
+        "rootMap": KvasInMemoryJsonMap {
+          "host": Object {
+            "b": Object {
+              "c": Array [
+                "the-value",
+                "the-value2",
+                "the-value3",
+              ],
+            },
+          },
+          "icfg": Object {
+            "getValueType": [Function],
+            "options": Object {
+              "ignoreIncompatibleHostAndKey": false,
+            },
+          },
+          "mapType": "object",
+        },
+      },
+    }
+  `);
 });
