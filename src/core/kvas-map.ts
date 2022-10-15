@@ -25,23 +25,11 @@ export type KvasMapSetKeyResult = {
   [key: string]: never;
 };
 
+export type KvasMapPushResult = Record<string, never>;
+
 export type KvasMapDeleteKeyResult = {
   found?: boolean;
 };
-
-// export type KvasTypeParametersFromKvasMap<
-//   KM extends KvasMap<KvasTypeParameters>,
-// > = {
-//   Key: Parameters<KM['setKey']>[0];
-//   PrimitiveValue: Exclude<Parameters<KM['setKey']>[1], KM>;
-// };
-
-// export type KvasKeyFromKvasMap<KM extends KvasMap<KvasTypeParameters>> =
-//   KvasTypeParametersFromKvasMap<KM>['Key'];
-//
-// export type KvasPrimitiveValueFromKvasMap<
-//   KM extends KvasMap<KvasTypeParameters>,
-// > = KvasTypeParametersFromKvasMap<KM>['PrimitiveValue'];
 
 export type KvasMapEntry<KTP extends KvasTypeParameters> = {
   key: KTP['Key'];
@@ -64,6 +52,11 @@ export abstract class KvasMap<KTP extends KvasTypeParameters> {
 
   abstract listKeys(): KvasSyncOrPromiseResult<KTP['Key'][]>;
 
+  abstract push(
+    value: KTP['PrimitiveValue'] | KvasMap<KTP>,
+    key?: KTP['Key'],
+  ): KvasSyncOrPromiseResult<KvasMapPushResult>;
+
   listEntries(): KvasSyncOrPromiseResult<KvasMapEntry<KTP>[]> {
     const sync = () => {
       const keys = this.listKeys().sync?.();
@@ -84,7 +77,7 @@ export abstract class KvasMap<KTP extends KvasTypeParameters> {
 }
 
 export type KvasEMapMixin<JSO> = {
-  toJsObject?(): KvasSyncOrPromiseResult<KvasMapOperationsToObjectResult<JSO>>;
+  toJSO?(): KvasSyncOrPromiseResult<KvasMapOperationsToObjectResult<JSO>>;
 };
 
 export type KvasEMap<KTP extends KvasTypeParameters, JSO> = KvasMap<KTP> &

@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/dany-fedorov/kvas.git"
+    "url": "git://github.com/dany-fedorov/key-value-abstract-store.git"
   },
   "publishConfig": {
     "access": "public"

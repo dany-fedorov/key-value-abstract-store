@@ -10,8 +10,10 @@ import {
   KvasMap,
   KvasMapDeleteKeyResult,
   KvasMapGetKeyResult,
+  KvasMapPushResult,
   KvasMapSetKeyResult,
 } from '@core/kvas-map';
+import { KvasInMemoryJsonMapOperations } from '@in-memory-json/kvas-in-memory-json-map-operations';
 
 export type KvasInMemoryJsonKey = string | number;
 
@@ -122,8 +124,10 @@ export class KvasInMemoryJsonMap<P extends JsonPrimitive> extends KvasMap<
         ...(instanceConfig?.options || {}),
       },
     };
-    // this.host = dataObjectToKvasInMemoryJsonMapRecur(data);
     this.host = data instanceof KvasInMemoryJsonMap ? data.host : data;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    delete this.icfg.data;
   }
 
   static isMapTypeCompatibleWithKeyType = isMapTypeCompatibleWithKeyType;
@@ -208,9 +212,17 @@ export class KvasInMemoryJsonMap<P extends JsonPrimitive> extends KvasMap<
           key,
         );
       }
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      this.host[key] = value;
+      if (value instanceof KvasInMemoryJsonMap) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        this.host[key] = KvasInMemoryJsonMapOperations.prototype
+          .toJSO(value)
+          .sync().jso;
+      } else {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        this.host[key] = value;
+      }
       return {};
     };
     return {
@@ -236,6 +248,40 @@ export class KvasInMemoryJsonMap<P extends JsonPrimitive> extends KvasMap<
           } and host ${jsonStringifySafe(this.host)}`,
         );
       }
+    };
+    return {
+      sync,
+      promise: () => Promise.resolve(sync()),
+    };
+  }
+
+  push(
+    value:
+      | KvasInMemoryJsonTypeParameters<P>['PrimitiveValue']
+      | KvasInMemoryJsonMap<P>,
+    key?: KvasInMemoryJsonTypeParameters<P>['Key'],
+  ): KvasSyncOrPromiseResult<KvasMapPushResult> {
+    const sync = () => {
+      if (key !== undefined) {
+        return this.setKey(key, value)?.sync?.() as KvasMapPushResult;
+      }
+      const numKeys = this.listKeys()
+        ?.sync?.()
+        ?.filter((k) => {
+          if (typeof k === 'number') {
+            return k;
+          }
+          const m = k.match(/^\d+$/);
+          if (m) {
+            return Number(m[0]);
+          }
+          return null;
+        })
+        .sort();
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const k = numKeys.at(-1) as KvasInMemoryJsonTypeParameters<P>['Key'];
+      return this.setKey(k, value)?.sync?.() as KvasMapPushResult;
     };
     return {
       sync,

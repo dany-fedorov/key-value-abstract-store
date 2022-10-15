@@ -1,8 +1,7 @@
-// import { kvasInMemoryJsonMapToDataObjectRecur } from './kvas-in-memory-json-utils';
-
 import type {
   JsonComposite,
   JsonPrimitive,
+  JsonValue,
 } from '@in-memory-json/kvas-in-memory-json-types';
 import {
   CreateMapOptions,
@@ -17,13 +16,21 @@ import type {
 } from '@in-memory-json/kvas-in-memory-json-map';
 import { KvasInMemoryJsonMap } from '@in-memory-json/kvas-in-memory-json-map';
 import type { KvasSyncOrPromiseResult, KvasSyncResult } from '@core/kvas-types';
+import { jsonStringifySafe } from '@in-memory-json/kvas-in-memory-json-utils';
+
+export const PRIMITIVE_TYPEOF_TYPES = [
+  'null',
+  'undefined',
+  'symbol',
+  'string',
+  'number',
+  'boolean',
+  'bigint',
+];
 
 export class KvasInMemoryJsonMapOperations<
   P extends JsonPrimitive,
-> extends KvasMapOperations<
-  KvasInMemoryJsonTypeParameters<P>,
-  JsonComposite<P>
-> {
+> extends KvasMapOperations<KvasInMemoryJsonTypeParameters<P>, JsonValue<P>> {
   createMap(
     options?: CreateMapOptions<
       KvasInMemoryJsonTypeParameters<P>,
@@ -34,58 +41,62 @@ export class KvasInMemoryJsonMapOperations<
     inMemoryJsonMapInstanceConfig?: KvasInMemoryJsonMapInstanceConfigInput<P>,
   ): KvasSyncOrPromiseResult<KvasInMemoryJsonMap<P>> {
     const sync = () => {
-      const map =
-        options?.fromMap ||
-        (options?.fromJsObject &&
-          (
-            this.fromJsObject(options?.fromJsObject, {
-              ...(options?.ignoreIncompatibleHostAndKeyTypes === undefined
-                ? {}
-                : {
-                    ignoreIncompatibleHostAndKeyTypes:
-                      options?.ignoreIncompatibleHostAndKeyTypes,
-                  }),
-            }) as KvasSyncResult<
-              KvasMapOperationsFromJsResult<
-                KvasInMemoryJsonTypeParameters<P>,
-                KvasInMemoryJsonMap<P>
+      const value =
+        (options?.fromMap ||
+          (options?.fromJSO &&
+            (
+              this.fromJSO(options?.fromJSO, {
+                ...(options?.ignoreIncompatibleHostAndKeyTypes === undefined
+                  ? {}
+                  : {
+                      ignoreIncompatibleHostAndKeyTypes:
+                        options?.ignoreIncompatibleHostAndKeyTypes,
+                    }),
+              }) as KvasSyncResult<
+                KvasMapOperationsFromJsResult<
+                  KvasInMemoryJsonTypeParameters<P>,
+                  KvasInMemoryJsonMap<P>
+                >
               >
-            >
-          ).sync().map);
-      const typeofKey = typeof options?.forKey;
-      if (typeofKey === 'number') {
+            ).sync().value)) ??
+        null;
+      if (value !== null && !(value instanceof KvasInMemoryJsonMap)) {
+        throw new Error(`Value is not a map ${jsonStringifySafe(value)}`);
+      }
+      const typeofKeyInside = typeof options?.forKeyInside;
+      if (typeofKeyInside === 'number') {
         const m = new KvasInMemoryJsonMap<P>({
           ...(inMemoryJsonMapInstanceConfig || {}),
           data: [],
         });
-        if (map) {
+        if (value) {
           KvasInMemoryJsonMap.isMapTypeCompatibleWithKeyType(
-            map.mapType,
-            typeofKey,
+            value.mapType,
+            typeofKeyInside,
           );
-          m.host = map.host;
+          m.host = value.host;
         }
         return m;
-      } else if (typeofKey === 'string') {
+      } else if (typeofKeyInside === 'string') {
         const m = new KvasInMemoryJsonMap<P>({
           ...(inMemoryJsonMapInstanceConfig || {}),
           data: {},
         });
-        if (map) {
+        if (value) {
           KvasInMemoryJsonMap.isMapTypeCompatibleWithKeyType(
-            map.mapType,
-            typeofKey,
+            value.mapType,
+            typeofKeyInside,
           );
-          m.host = map.host;
+          m.host = value.host;
         }
         return m;
-      } else if (!map) {
+      } else if (!value) {
         return new KvasInMemoryJsonMap<P>({
           ...(inMemoryJsonMapInstanceConfig || {}),
           data: {},
         });
       }
-      return map;
+      return value;
     };
     return {
       sync,
@@ -93,14 +104,14 @@ export class KvasInMemoryJsonMapOperations<
     };
   }
 
-  override toJsObject(
+  override toJSO(
     kvasMap: KvasInMemoryJsonMap<P>,
   ): KvasSyncOrPromiseResult<
     KvasMapOperationsToObjectResult<JsonComposite<P>>
   > {
     const sync = () => {
       // return { object: kvasInMemoryJsonMapToDataObjectRecur(kvasMap) };
-      return { object: kvasMap.host };
+      return { jso: kvasMap.host };
     };
     return {
       sync,
@@ -108,8 +119,8 @@ export class KvasInMemoryJsonMapOperations<
     };
   }
 
-  override fromJsObject(
-    jsObject: JsonComposite<P>,
+  override fromJSO(
+    jso: JsonValue<P>,
     options: KvasInMemoryJsonMapOptions,
   ): KvasSyncOrPromiseResult<
     KvasMapOperationsFromJsResult<
@@ -118,10 +129,16 @@ export class KvasInMemoryJsonMapOperations<
     >
   > {
     const sync = () => {
-      // console.log('fromJsObject', jsObject);
-      const map = new KvasInMemoryJsonMap({ data: jsObject, options });
-      // console.log('fromJsObject', map);
-      return { map };
+      // console.log('fromJSO', jso);
+      if (PRIMITIVE_TYPEOF_TYPES.includes(typeof jso)) {
+        return { value: jso as P };
+      }
+      const value = new KvasInMemoryJsonMap({
+        data: jso as JsonComposite<P>,
+        options,
+      });
+      // console.log('fromJSO', map);
+      return { value: value };
     };
     return {
       sync,

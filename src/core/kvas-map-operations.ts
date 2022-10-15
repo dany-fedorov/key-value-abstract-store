@@ -7,6 +7,7 @@ import type {
   KvasProp,
 } from '@core/kvas-map';
 import type {
+  KvasPathWritable,
   KvasPath,
   KvasSyncOrPromiseResult,
   KvasSyncResult,
@@ -16,7 +17,7 @@ import { KvasValueType } from '@core/kvas-types';
 import { KvasError } from '@core/kvas-errors';
 
 export type KvasMapOperationsToObjectResult<JSO> = {
-  object: JSO;
+  jso: JSO;
 };
 
 export type KvasMapOperationsGetResult<
@@ -35,10 +36,11 @@ export type CreateMapOptions<
   JSO,
   KM = KvasMap<KTP>,
 > = {
-  forKey?: KTP['Key'];
+  forHostKey?: KTP['Key'];
+  forKeyInside?: KTP['Key'];
   asDataSourceRoot?: boolean;
   fromMap?: KM;
-  fromJsObject?: JSO;
+  fromJSO?: JSO;
 };
 
 export type KvasMapOperationsQueryResult<KTP extends KvasTypeParameters> = {
@@ -55,7 +57,7 @@ export type KvasMapOperationsFromJsResult<
   KTP extends KvasTypeParameters,
   KM = KvasMap<KTP>,
 > = {
-  map: KM;
+  value: KM | KTP['PrimitiveValue'];
 };
 
 /**
@@ -65,17 +67,17 @@ export interface KvasMapOperations<
   KTP extends KvasTypeParameters,
   JSO = unknown,
 > {
-  fromJsObject?(
-    jsObject: JSO,
+  fromJSO?(
+    jso: JSO,
     ...rest: any[]
   ): KvasSyncOrPromiseResult<KvasMapOperationsFromJsResult<KTP>>;
 
-  toJsObject?(
+  toJSO?(
     kvasMap: KvasMap<KTP> | KTP['PrimitiveValue'],
   ): KvasSyncOrPromiseResult<KvasMapOperationsToObjectResult<JSO>>;
 }
 
-export type KvasMapOperationsGetJsObjectInPathResult<
+export type KvasMapOperationsGetJSOInPathResult<
   KTP extends KvasTypeParameters,
   JSO,
 > = {
@@ -84,8 +86,7 @@ export type KvasMapOperationsGetJsObjectInPathResult<
   };
 };
 
-export type KvasMapOperationsSetJsObjectInPathResult =
-  KvasMapOperationsSetResult;
+export type KvasMapOperationsSetJSOInPathResult = KvasMapOperationsSetResult;
 
 export abstract class KvasMapOperations<
   KTP extends KvasTypeParameters,
@@ -112,14 +113,14 @@ export abstract class KvasMapOperations<
           lastFoundMapProp: { ...prop, type: KvasValueType.MAP }, // For TypeScript
         };
       }
-      let lastFoundPropPath: KvasPath<KTP> = [];
+      let lastFoundPropPath: KvasPathWritable<KTP> = [];
       // eslint-disable-next-line @typescript-eslint/no-this-alias
       let lastFoundPropValue: KvasMap<KTP> | KTP['PrimitiveValue'] = map;
       let lastFoundPropType: KvasValueType = KvasValueType.MAP;
-      let lastFoundPropMapPath: KvasPath<KTP> = [];
+      let lastFoundPropMapPath: KvasPathWritable<KTP> = [];
       // eslint-disable-next-line @typescript-eslint/no-this-alias
       let lastFoundPropMapValue: KvasMap<KTP> = map;
-      const curPath: KvasPath<KTP> = [];
+      const curPath: KvasPathWritable<KTP> = [];
       for (let i = 0; i < path.length; i++) {
         const pathSegment = path[i] as KTP['Key'];
         curPath.push(pathSegment);
@@ -225,7 +226,7 @@ export abstract class KvasMapOperations<
       }
       return (
         lastFoundMapProp.value.deleteKey(
-          path.at(-1) as KTP['Key'],
+          path[path.length - 1] as KTP['Key'],
         ) as KvasSyncResult<KvasMapDeleteKeyResult>
       ).sync();
     };
@@ -246,15 +247,15 @@ export abstract class KvasMapOperations<
         ...prop,
         value: Object.assign(
           prop.value as KvasMap<KTP>,
-          !self.toJsObject
+          !self.toJSO
             ? {}
             : {
-                toJsObject(): KvasSyncOrPromiseResult<
+                toJSO(): KvasSyncOrPromiseResult<
                   KvasMapOperationsToObjectResult<JSO>
                 > {
                   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                   // @ts-ignore
-                  return self.toJsObject(this);
+                  return self.toJSO(this);
                 },
               },
         ),
@@ -315,7 +316,7 @@ export abstract class KvasMapOperations<
         >
       ).sync();
       if (lastFoundMapProp.path.length === path.length - 1) {
-        lastFoundMapProp.value.setKey(path.at(-1), value);
+        lastFoundMapProp.value.setKey(path[path.length - 1], value)?.sync?.();
         return {};
       }
       const pathToCreateMapsIn = path.slice(
@@ -323,11 +324,13 @@ export abstract class KvasMapOperations<
         path.length - 1,
       );
       let curMap: KvasMap<KTP> = lastFoundMapProp.value;
-      pathToCreateMapsIn.forEach((pathSegment) => {
+      pathToCreateMapsIn.forEach((pathSegment, i) => {
+        const nextPathSegment = path[i + 1];
         const newMap = (
-          this.createMap({ forKey: pathSegment }) as KvasSyncResult<
-            KvasMap<KTP>
-          >
+          this.createMap({
+            forHostKey: pathSegment,
+            forKeyInside: nextPathSegment,
+          }) as KvasSyncResult<KvasMap<KTP>>
         ).sync();
         (
           curMap.setKey(
@@ -338,7 +341,10 @@ export abstract class KvasMapOperations<
         curMap = newMap;
       });
       (
-        curMap.setKey(path.at(-1), value) as KvasSyncResult<KvasMapSetKeyResult>
+        curMap.setKey(
+          path[path.length - 1],
+          value,
+        ) as KvasSyncResult<KvasMapSetKeyResult>
       ).sync();
       return {};
     };
@@ -349,31 +355,26 @@ export abstract class KvasMapOperations<
     };
   }
 
-  getJsObjectInPath(
+  getJSOInPath(
     map: KvasMap<KTP>,
     path: KvasPath<KTP>,
-  ): KvasSyncOrPromiseResult<
-    KvasMapOperationsGetJsObjectInPathResult<KTP, JSO>
-  > {
+  ): KvasSyncOrPromiseResult<KvasMapOperationsGetJSOInPathResult<KTP, JSO>> {
     const sync = () => {
       const { prop } = (
         this.getInPath(map, path) as KvasSyncResult<
           KvasMapOperationsGetResult<KTP>
         >
       ).sync();
-      if (!this.toJsObject) {
-        throw new KvasError('Cannot toJsObject');
+      if (!this.toJSO) {
+        throw new KvasError('Cannot toJSO');
       }
-      if (prop.type === KvasValueType.PRIMITIVE) {
+      if (prop.type === KvasValueType.PRIMITIVE || prop.type === undefined) {
         return {
-          prop: prop as KvasMapOperationsGetJsObjectInPathResult<
-            KTP,
-            JSO
-          >['prop'],
+          prop: prop as KvasMapOperationsGetJSOInPathResult<KTP, JSO>['prop'],
         };
       }
-      const { object: newVal } = (
-        this.toJsObject(prop.value) as KvasSyncResult<
+      const { jso: newVal } = (
+        this.toJSO(prop.value) as KvasSyncResult<
           KvasMapOperationsToObjectResult<JSO>
         >
       ).sync();
@@ -390,21 +391,21 @@ export abstract class KvasMapOperations<
     };
   }
 
-  setJsObjectInPath(
+  setJSOInPath(
     map: KvasMap<KTP>,
     path: KvasPath<KTP>,
-    jsObject: JSO,
-  ): KvasSyncOrPromiseResult<KvasMapOperationsSetJsObjectInPathResult> {
+    jso: JSO,
+  ): KvasSyncOrPromiseResult<KvasMapOperationsSetJSOInPathResult> {
     const sync = () => {
-      if (!this.fromJsObject) {
-        throw new KvasError('Cannot fromJsObject');
+      if (!this.fromJSO) {
+        throw new KvasError('Cannot fromJSO');
       }
-      const kvasMap = this.fromJsObject(jsObject);
+      const kvasMapOrPrimitive = this.fromJSO(jso)?.sync?.()?.value;
       return (
         this.setInPath(
           map,
           path,
-          kvasMap,
+          kvasMapOrPrimitive,
         ) as KvasSyncResult<KvasMapOperationsSetResult>
       ).sync();
     };

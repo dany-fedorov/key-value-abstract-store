@@ -4,8 +4,8 @@ import type {
   KvasMapOperationsGetResult,
   KvasMapOperationsSetResult,
   KvasMapOperations,
-  KvasMapOperationsGetJsObjectInPathResult,
-  KvasMapOperationsSetJsObjectInPathResult,
+  KvasMapOperationsGetJSOInPathResult,
+  KvasMapOperationsSetJSOInPathResult,
   CreateMapOptions,
 } from '@core/kvas-map-operations';
 import type {
@@ -23,41 +23,33 @@ export type KvasDataSourceGetResult<
 export type KvasDataSourceSetResult = KvasMapOperationsSetResult;
 export type KvasDataSourceDeleteResult = KvasMapOperationsDeleteResult;
 
-export type KvasDataSourceConfig<KTP extends KvasTypeParameters> = {
-  operations: KvasMapOperations<KTP>;
-};
-
-export type KvasDataSourceGetJsObjectResult<
+export type KvasDataSourceGetJSOResult<
   KTP extends KvasTypeParameters,
   JSO = unknown,
-> = KvasMapOperationsGetJsObjectInPathResult<KTP, JSO>;
+> = KvasMapOperationsGetJSOInPathResult<KTP, JSO>;
 
-export type KvasDataSourceSetJsObjectResult =
-  KvasMapOperationsSetJsObjectInPathResult;
+export type KvasDataSourceSetJSOResult = KvasMapOperationsSetJSOInPathResult;
 
 export type KvasDataSourceInitializeOptions<
   KTP extends KvasTypeParameters,
   JSO,
-> = Pick<CreateMapOptions<KTP, JSO>, 'fromMap' | 'fromJsObject'>;
+> = Pick<CreateMapOptions<KTP, JSO>, 'fromMap' | 'fromJSO'>;
 
 export class KvasDataSource<
   KTP extends KvasTypeParameters,
   JSO = unknown,
   KM = KvasMap<KTP>,
 > {
-  protected readonly config: KvasDataSourceConfig<KTP>;
-  rootMap: KM | null = null;
+  private rootMap: KM | null = null;
 
-  constructor(config: KvasDataSourceConfig<KTP>) {
-    this.config = config;
-  }
+  constructor(private readonly operations: KvasMapOperations<KTP>) {}
 
   initialize(
     options?: KvasDataSourceInitializeOptions<KTP, JSO>,
   ): KvasSyncOrPromiseResult<void> {
     const sync = () => {
       this.rootMap = (
-        this.config.operations.createMap({
+        this.operations.createMap({
           asDataSourceRoot: true,
           ...(options || {}),
         }) as unknown as KvasSyncResult<KM>
@@ -85,8 +77,10 @@ export class KvasDataSource<
     path: KvasPath<KTP>,
   ): KvasSyncOrPromiseResult<KvasDataSourceGetResult<KTP, KvasEMap<KTP, JSO>>> {
     this.checkIsInitialized();
-    const { operations } = this.config;
-    return operations.getInPath(this.rootMap as unknown as KvasMap<KTP>, path);
+    return this.operations.getInPath(
+      this.rootMap as unknown as KvasMap<KTP>,
+      path,
+    );
   }
 
   set(
@@ -94,8 +88,7 @@ export class KvasDataSource<
     value: KTP['PrimitiveValue'] | KM,
   ): KvasSyncOrPromiseResult<KvasDataSourceSetResult> {
     this.checkIsInitialized();
-    const { operations } = this.config;
-    return operations.setInPath(
+    return this.operations.setInPath(
       this.rootMap as unknown as KvasMap<KTP>,
       path,
       value,
@@ -106,34 +99,31 @@ export class KvasDataSource<
     path: KvasPath<KTP>,
   ): KvasSyncOrPromiseResult<KvasDataSourceDeleteResult> {
     this.checkIsInitialized();
-    const { operations } = this.config;
-    return operations.deleteInPath(
+    return this.operations.deleteInPath(
       this.rootMap as unknown as KvasMap<KTP>,
       path,
     );
   }
 
-  getJsObject(
+  getJSO(
     path: KvasPath<KTP>,
-  ): KvasSyncOrPromiseResult<KvasDataSourceGetJsObjectResult<KTP>> {
+  ): KvasSyncOrPromiseResult<KvasDataSourceGetJSOResult<KTP>> {
     this.checkIsInitialized();
-    const { operations } = this.config;
-    return operations.getJsObjectInPath(
+    return this.operations.getJSOInPath(
       this.rootMap as unknown as KvasMap<KTP>,
       path,
     );
   }
 
-  setJsObject(
+  setJSO(
     path: KvasPath<KTP>,
-    jsObject: JSO,
-  ): KvasSyncOrPromiseResult<KvasDataSourceSetJsObjectResult> {
+    jso: JSO,
+  ): KvasSyncOrPromiseResult<KvasDataSourceSetJSOResult> {
     this.checkIsInitialized();
-    const { operations } = this.config;
-    return operations.setJsObjectInPath(
+    return this.operations.setJSOInPath(
       this.rootMap as unknown as KvasMap<KTP>,
       path,
-      jsObject,
+      jso,
     );
   }
 }

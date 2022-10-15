@@ -1,0 +1,132 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should overwrite nested value creating necessary objects 1`] = `
+Object {
+  "prop": Object {
+    "path": Array [
+      0,
+      1,
+    ],
+    "type": "primitive",
+    "value": "the-value-1",
+  },
+}
+`;
+
+exports[`should overwrite nested value creating necessary objects 2`] = `
+Object {
+  "prop": Object {
+    "path": Array [
+      0,
+      1,
+    ],
+    "type": "map",
+    "value": Array [
+      ,
+      ,
+      "the-value-2",
+    ],
+  },
+}
+`;
+
+exports[`should overwrite nested value creating necessary objects 3`] = `
+Object {
+  "prop": Object {
+    "path": Array [
+      0,
+      1,
+      2,
+    ],
+    "type": "primitive",
+    "value": "the-value-2",
+  },
+}
+`;
+
+exports[`should overwrite nested value creating necessary objects 4`] = `
+KvasDataSourceSyncContainer {
+  "dataSource": KvasInMemoryJsonDataSource {
+    "operations": KvasInMemoryJsonMapOperations {},
+    "rootMap": KvasInMemoryJsonMap {
+      "host": Array [
+        Array [
+          ,
+          Array [
+            ,
+            ,
+            "the-value-2",
+          ],
+        ],
+      ],
+      "icfg": Object {
+        "getValueType": [Function],
+        "options": Object {
+          "ignoreIncompatibleHostAndKey": false,
+        },
+      },
+      "mapType": "array",
+    },
+  },
+}
+`;
+
+exports[`should set nested value creating necessary arrays 1`] = `
+Object {
+  "prop": Object {
+    "path": Array [
+      0,
+      1,
+      2,
+    ],
+    "type": "primitive",
+    "value": "the-value",
+  },
+}
+`;
+
+exports[`should set nested value creating necessary arrays 2`] = `
+Object {
+  "prop": Object {
+    "path": Array [
+      0,
+    ],
+    "type": "map",
+    "value": Array [
+      ,
+      Array [
+        ,
+        ,
+        "the-value",
+      ],
+    ],
+  },
+}
+`;
+
+exports[`should set nested value creating necessary arrays 3`] = `
+KvasDataSourceSyncContainer {
+  "dataSource": KvasInMemoryJsonDataSource {
+    "operations": KvasInMemoryJsonMapOperations {},
+    "rootMap": KvasInMemoryJsonMap {
+      "host": Array [
+        Array [
+          ,
+          Array [
+            ,
+            ,
+            "the-value",
+          ],
+        ],
+      ],
+      "icfg": Object {
+        "getValueType": [Function],
+        "options": Object {
+          "ignoreIncompatibleHostAndKey": false,
+        },
+      },
+      "mapType": "array",
+    },
+  },
+}
+`;
