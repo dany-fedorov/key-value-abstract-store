@@ -25,7 +25,9 @@ export type KvasMapSetKeyResult = {
   [key: string]: never;
 };
 
-export type KvasMapPushResult = Record<string, never>;
+export type KvasMapPushResult<KTP extends KvasTypeParameters> = {
+  key: KTP['Key'];
+};
 
 export type KvasMapDeleteKeyResult = {
   found?: boolean;
@@ -55,7 +57,7 @@ export abstract class KvasMap<KTP extends KvasTypeParameters> {
   abstract push(
     value: KTP['PrimitiveValue'] | KvasMap<KTP>,
     key?: KTP['Key'],
-  ): KvasSyncOrPromiseResult<KvasMapPushResult>;
+  ): KvasSyncOrPromiseResult<KvasMapPushResult<KTP>>;
 
   listEntries(): KvasSyncOrPromiseResult<KvasMapEntry<KTP>[]> {
     const sync = () => {
@@ -80,5 +82,4 @@ export type KvasEMapMixin<JSO> = {
   toJSO?(): KvasSyncOrPromiseResult<KvasMapOperationsToObjectResult<JSO>>;
 };
 
-export type KvasEMap<KTP extends KvasTypeParameters, JSO> = KvasMap<KTP> &
-  KvasEMapMixin<JSO>;
+export type KvasEMap<KM extends KvasMap<any>, JSO> = KM & KvasEMapMixin<JSO>;

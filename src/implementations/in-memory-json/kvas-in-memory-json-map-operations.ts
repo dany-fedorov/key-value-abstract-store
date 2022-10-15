@@ -30,7 +30,11 @@ export const PRIMITIVE_TYPEOF_TYPES = [
 
 export class KvasInMemoryJsonMapOperations<
   P extends JsonPrimitive,
-> extends KvasMapOperations<KvasInMemoryJsonTypeParameters<P>, JsonValue<P>> {
+> extends KvasMapOperations<
+  KvasInMemoryJsonTypeParameters<P>,
+  KvasInMemoryJsonMap<P>,
+  JsonValue<P>
+> {
   createMap(
     options?: CreateMapOptions<
       KvasInMemoryJsonTypeParameters<P>,

@@ -1,0 +1,52 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should push to object selecting key automatically 1`] = `
+Object {
+  "key1": "0",
+  "key2": "1",
+  "key3": "2",
+}
+`;
+
+exports[`should push to object selecting key automatically 2`] = `
+Object {
+  "prop": Object {
+    "path": Array [
+      "b",
+      "c",
+    ],
+    "type": "map",
+    "value": Object {
+      "0": "the-value",
+      "1": "the-value2",
+      "2": "the-value3",
+    },
+  },
+}
+`;
+
+exports[`should push to object selecting key automatically 3`] = `
+KvasDataSourceSyncContainer {
+  "dataSource": KvasInMemoryJsonDataSource {
+    "operations": KvasInMemoryJsonMapOperations {},
+    "rootMap": KvasInMemoryJsonMap {
+      "host": Object {
+        "b": Object {
+          "c": Object {
+            "0": "the-value",
+            "1": "the-value2",
+            "2": "the-value3",
+          },
+        },
+      },
+      "icfg": Object {
+        "getValueType": [Function],
+        "options": Object {
+          "ignoreIncompatibleHostAndKey": false,
+        },
+      },
+      "mapType": "object",
+    },
+  },
+}
+`;

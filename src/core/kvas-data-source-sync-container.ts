@@ -6,6 +6,8 @@ import type {
   KvasDataSourceSetJSOResult,
   KvasDataSourceSetResult,
   KvasDataSource,
+  KvasDataSourcePushResult,
+  KvasDataSourcePushJSOResult,
 } from '@core/kvas-data-source';
 import type {
   KvasPath,
@@ -13,6 +15,7 @@ import type {
   KvasTypeParameters,
 } from '@core/kvas-types';
 import type { KvasEMap } from '@core/kvas-map';
+import type { KvasMap } from '@core/kvas-map';
 
 type AllSync<T extends object> = {
   [K in keyof T]: T[K] extends (
@@ -24,13 +27,13 @@ type AllSync<T extends object> = {
 
 export class KvasDataSourceSyncContainer<
   KTP extends KvasTypeParameters,
+  KM extends KvasMap<KTP>,
   JSO,
-  KM,
-> implements AllSync<KvasDataSource<KTP, JSO, KM>>
+> implements AllSync<KvasDataSource<KTP, KM, JSO>>
 {
-  constructor(private readonly dataSource: KvasDataSource<KTP, JSO, KM>) {}
+  constructor(private readonly dataSource: KvasDataSource<KTP, KM, JSO>) {}
 
-  initialize(options?: KvasDataSourceInitializeOptions<KTP, JSO>): void {
+  initialize(options?: KvasDataSourceInitializeOptions<KTP, KM, JSO>): void {
     return this.dataSource.initialize(options)?.sync?.();
   }
 
@@ -38,7 +41,7 @@ export class KvasDataSourceSyncContainer<
     return this.dataSource.isInitialized();
   }
 
-  get(path: KvasPath<KTP>): KvasDataSourceGetResult<KTP, KvasEMap<KTP, JSO>> {
+  get(path: KvasPath<KTP>): KvasDataSourceGetResult<KTP, KvasEMap<KM, JSO>> {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     return this.dataSource.get(path)?.sync?.();
@@ -59,7 +62,7 @@ export class KvasDataSourceSyncContainer<
     return this.dataSource.delete(path)?.sync?.();
   }
 
-  getJSO(path: KvasPath<KTP>): KvasDataSourceGetJSOResult<KTP> {
+  getJSO(path: KvasPath<KTP>): KvasDataSourceGetJSOResult<KTP, KM, JSO> {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     return this.dataSource.getJSO(path)?.sync?.();
@@ -69,5 +72,20 @@ export class KvasDataSourceSyncContainer<
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     return this.dataSource.setJSO(path, jso)?.sync?.();
+  }
+
+  push(
+    path: KvasPath<KTP>,
+    value: KTP['PrimitiveValue'] | KM,
+  ): KvasDataSourcePushResult<KTP> {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    return this.dataSource.push(path, value)?.sync?.();
+  }
+
+  pushJSO(path: KvasPath<KTP>, jso: JSO): KvasDataSourcePushJSOResult<KTP> {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    return this.dataSource.pushJSO(path, jso)?.sync?.();
   }
 }

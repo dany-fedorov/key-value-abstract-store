@@ -7,6 +7,8 @@ import type {
   KvasMapOperationsGetJSOInPathResult,
   KvasMapOperationsSetJSOInPathResult,
   CreateMapOptions,
+  KvasMapOperationsPushInPathResult,
+  KvasMapOperationsPushJSOInPathResult,
 } from '@core/kvas-map-operations';
 import type {
   KvasPath,
@@ -18,48 +20,55 @@ import { KvasError } from '@core/kvas-errors';
 
 export type KvasDataSourceGetResult<
   KTP extends KvasTypeParameters,
-  KM = KvasMap<KTP>,
+  KM extends KvasMap<KTP>,
 > = KvasMapOperationsGetResult<KTP, KM>;
 export type KvasDataSourceSetResult = KvasMapOperationsSetResult;
 export type KvasDataSourceDeleteResult = KvasMapOperationsDeleteResult;
 
 export type KvasDataSourceGetJSOResult<
   KTP extends KvasTypeParameters,
-  JSO = unknown,
-> = KvasMapOperationsGetJSOInPathResult<KTP, JSO>;
+  KM extends KvasMap<KTP>,
+  JSO,
+> = KvasMapOperationsGetJSOInPathResult<KTP, JSO, KM>;
 
 export type KvasDataSourceSetJSOResult = KvasMapOperationsSetJSOInPathResult;
+export type KvasDataSourcePushResult<KTP extends KvasTypeParameters> =
+  KvasMapOperationsPushInPathResult<KTP>;
+export type KvasDataSourcePushJSOResult<KTP extends KvasTypeParameters> =
+  KvasMapOperationsPushJSOInPathResult<KTP>;
 
 export type KvasDataSourceInitializeOptions<
   KTP extends KvasTypeParameters,
+  KM extends KvasMap<KTP>,
   JSO,
-> = Pick<CreateMapOptions<KTP, JSO>, 'fromMap' | 'fromJSO'>;
+> = Pick<CreateMapOptions<KTP, JSO, KM>, 'fromMap' | 'fromJSO'>;
 
 export class KvasDataSource<
   KTP extends KvasTypeParameters,
-  JSO = unknown,
-  KM = KvasMap<KTP>,
+  KM extends KvasMap<KTP>,
+  JSO,
 > {
   private rootMap: KM | null = null;
 
-  constructor(private readonly operations: KvasMapOperations<KTP>) {}
+  constructor(private readonly operations: KvasMapOperations<KTP, KM, JSO>) {}
 
   initialize(
-    options?: KvasDataSourceInitializeOptions<KTP, JSO>,
+    options?: KvasDataSourceInitializeOptions<KTP, KM, JSO>,
   ): KvasSyncOrPromiseResult<void> {
+    const createMap = () =>
+      this.operations.createMap({
+        asDataSourceRoot: true,
+        ...(options || {}),
+      });
     const sync = () => {
-      this.rootMap = (
-        this.operations.createMap({
-          asDataSourceRoot: true,
-          ...(options || {}),
-        }) as unknown as KvasSyncResult<KM>
-      ).sync();
-      // console.log({ rootMap: this.rootMap });
+      this.rootMap = (createMap() as unknown as KvasSyncResult<KM>).sync();
+    };
+    const promise = async () => {
+      this.rootMap = await createMap().promise();
     };
     return {
       sync,
-      // TODO
-      promise: () => Promise.resolve(sync()),
+      promise,
     };
   }
 
@@ -75,12 +84,9 @@ export class KvasDataSource<
 
   get(
     path: KvasPath<KTP>,
-  ): KvasSyncOrPromiseResult<KvasDataSourceGetResult<KTP, KvasEMap<KTP, JSO>>> {
+  ): KvasSyncOrPromiseResult<KvasDataSourceGetResult<KTP, KvasEMap<KM, JSO>>> {
     this.checkIsInitialized();
-    return this.operations.getInPath(
-      this.rootMap as unknown as KvasMap<KTP>,
-      path,
-    );
+    return this.operations.getInPath(this.rootMap as KM, path);
   }
 
   set(
@@ -88,31 +94,21 @@ export class KvasDataSource<
     value: KTP['PrimitiveValue'] | KM,
   ): KvasSyncOrPromiseResult<KvasDataSourceSetResult> {
     this.checkIsInitialized();
-    return this.operations.setInPath(
-      this.rootMap as unknown as KvasMap<KTP>,
-      path,
-      value,
-    );
+    return this.operations.setInPath(this.rootMap as KM, path, value);
   }
 
   delete(
     path: KvasPath<KTP>,
   ): KvasSyncOrPromiseResult<KvasDataSourceDeleteResult> {
     this.checkIsInitialized();
-    return this.operations.deleteInPath(
-      this.rootMap as unknown as KvasMap<KTP>,
-      path,
-    );
+    return this.operations.deleteInPath(this.rootMap as KM, path);
   }
 
   getJSO(
     path: KvasPath<KTP>,
-  ): KvasSyncOrPromiseResult<KvasDataSourceGetJSOResult<KTP>> {
+  ): KvasSyncOrPromiseResult<KvasDataSourceGetJSOResult<KTP, KM, JSO>> {
     this.checkIsInitialized();
-    return this.operations.getJSOInPath(
-      this.rootMap as unknown as KvasMap<KTP>,
-      path,
-    );
+    return this.operations.getJSOInPath(this.rootMap as KM, path);
   }
 
   setJSO(
@@ -120,10 +116,22 @@ export class KvasDataSource<
     jso: JSO,
   ): KvasSyncOrPromiseResult<KvasDataSourceSetJSOResult> {
     this.checkIsInitialized();
-    return this.operations.setJSOInPath(
-      this.rootMap as unknown as KvasMap<KTP>,
-      path,
-      jso,
-    );
+    return this.operations.setJSOInPath(this.rootMap as KM, path, jso);
+  }
+
+  push(
+    path: KvasPath<KTP>,
+    value: KTP['PrimitiveValue'] | KM,
+  ): KvasSyncOrPromiseResult<KvasDataSourcePushResult<KTP>> {
+    this.checkIsInitialized();
+    return this.operations.pushInPath(this.rootMap as KM, path, value);
+  }
+
+  pushJSO(
+    path: KvasPath<KTP>,
+    jso: JSO,
+  ): KvasSyncOrPromiseResult<KvasDataSourcePushJSOResult<KTP>> {
+    this.checkIsInitialized();
+    return this.operations.pushJSOInPath(this.rootMap as KM, path, jso);
   }
 }

@@ -260,28 +260,46 @@ export class KvasInMemoryJsonMap<P extends JsonPrimitive> extends KvasMap<
       | KvasInMemoryJsonTypeParameters<P>['PrimitiveValue']
       | KvasInMemoryJsonMap<P>,
     key?: KvasInMemoryJsonTypeParameters<P>['Key'],
-  ): KvasSyncOrPromiseResult<KvasMapPushResult> {
+  ): KvasSyncOrPromiseResult<
+    KvasMapPushResult<KvasInMemoryJsonTypeParameters<P>>
+  > {
     const sync = () => {
       if (key !== undefined) {
-        return this.setKey(key, value)?.sync?.() as KvasMapPushResult;
+        this.setKey(key, value)?.sync?.();
+        return { key };
       }
       const numKeys = this.listKeys()
         ?.sync?.()
         ?.filter((k) => {
           if (typeof k === 'number') {
-            return k;
+            return true;
           }
           const m = k.match(/^\d+$/);
           if (m) {
-            return Number(m[0]);
+            return true;
           }
-          return null;
+          return false;
         })
+        .map((k) => Number(k))
         .sort();
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      const k = numKeys.at(-1) as KvasInMemoryJsonTypeParameters<P>['Key'];
-      return this.setKey(k, value)?.sync?.() as KvasMapPushResult;
+      const _k =
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        numKeys.length === 0
+          ? 0
+          : // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            (numKeys[
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              numKeys.length - 1
+            ] as KvasInMemoryJsonTypeParameters<P>['Key']) + 1;
+      let k = _k;
+      if (this.mapType === KvasInMemoryJsonMapType.OBJECT) {
+        k = String(_k);
+      }
+      this.setKey(k, value)?.sync?.();
+      return { key: k };
     };
     return {
       sync,

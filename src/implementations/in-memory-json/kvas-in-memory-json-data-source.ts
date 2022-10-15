@@ -17,6 +17,7 @@ export type KvasInMemoryJsonDataSourceCreateOptions<P extends JsonPrimitive> = {
   operations?: KvasInMemoryJsonMapOperations<P>;
 } & KvasDataSourceInitializeOptions<
   KvasInMemoryJsonTypeParameters<P>,
+  KvasInMemoryJsonMap<P>,
   JsonValue<P>
 >;
 
@@ -24,8 +25,8 @@ export class KvasInMemoryJsonDataSource<
   P extends JsonPrimitive,
 > extends KvasDataSource<
   KvasInMemoryJsonTypeParameters<P>,
-  JsonComposite<P> | P,
-  KvasInMemoryJsonMap<P>
+  KvasInMemoryJsonMap<P>,
+  JsonComposite<P> | P
 > {
   static createSyncDataStore<P extends JsonPrimitive>(
     options?: KvasInMemoryJsonDataSourceCreateOptions<P>,
