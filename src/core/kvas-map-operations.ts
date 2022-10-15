@@ -325,7 +325,7 @@ export abstract class KvasMapOperations<
       );
       let curMap: KvasMap<KTP> = lastFoundMapProp.value;
       pathToCreateMapsIn.forEach((pathSegment, i) => {
-        const nextPathSegment = path[i + 1];
+        const nextPathSegment = path[lastFoundMapProp.path.length + i + 1];
         const newMap = (
           this.createMap({
             forHostKey: pathSegment,

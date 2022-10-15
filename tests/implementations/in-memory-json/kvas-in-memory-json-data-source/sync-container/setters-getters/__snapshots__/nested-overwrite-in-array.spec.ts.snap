@@ -1,6 +1,36 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`should set nested value creating necessary arrays 1`] = `
+exports[`should overwrite nested value creating necessary arrays 1`] = `
+Object {
+  "prop": Object {
+    "path": Array [
+      0,
+      1,
+    ],
+    "type": "primitive",
+    "value": "the-value-1",
+  },
+}
+`;
+
+exports[`should overwrite nested value creating necessary arrays 2`] = `
+Object {
+  "prop": Object {
+    "path": Array [
+      0,
+      1,
+    ],
+    "type": "map",
+    "value": Array [
+      ,
+      ,
+      "the-value-2",
+    ],
+  },
+}
+`;
+
+exports[`should overwrite nested value creating necessary arrays 3`] = `
 Object {
   "prop": Object {
     "path": Array [
@@ -9,31 +39,12 @@ Object {
       2,
     ],
     "type": "primitive",
-    "value": "the-value",
+    "value": "the-value-2",
   },
 }
 `;
 
-exports[`should set nested value creating necessary arrays 2`] = `
-Object {
-  "prop": Object {
-    "path": Array [
-      0,
-    ],
-    "type": "map",
-    "value": Array [
-      ,
-      Array [
-        ,
-        ,
-        "the-value",
-      ],
-    ],
-  },
-}
-`;
-
-exports[`should set nested value creating necessary arrays 3`] = `
+exports[`should overwrite nested value creating necessary arrays 4`] = `
 KvasDataSourceSyncContainer {
   "dataSource": KvasInMemoryJsonDataSource {
     "operations": KvasInMemoryJsonMapOperations {},
@@ -44,7 +55,7 @@ KvasDataSourceSyncContainer {
           Array [
             ,
             ,
-            "the-value",
+            "the-value-2",
           ],
         ],
       ],

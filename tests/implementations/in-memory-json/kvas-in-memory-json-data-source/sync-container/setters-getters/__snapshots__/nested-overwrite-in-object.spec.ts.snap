@@ -1,6 +1,34 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`should set nested value creating necessary objects 1`] = `
+exports[`should overwrite nested value creating necessary objects 1`] = `
+Object {
+  "prop": Object {
+    "path": Array [
+      "field1",
+      "field2",
+    ],
+    "type": "primitive",
+    "value": "the-value-1",
+  },
+}
+`;
+
+exports[`should overwrite nested value creating necessary objects 2`] = `
+Object {
+  "prop": Object {
+    "path": Array [
+      "field1",
+      "field2",
+    ],
+    "type": "map",
+    "value": Object {
+      "field3": "the-value-2",
+    },
+  },
+}
+`;
+
+exports[`should overwrite nested value creating necessary objects 3`] = `
 Object {
   "prop": Object {
     "path": Array [
@@ -9,28 +37,12 @@ Object {
       "field3",
     ],
     "type": "primitive",
-    "value": "the-value",
+    "value": "the-value-2",
   },
 }
 `;
 
-exports[`should set nested value creating necessary objects 2`] = `
-Object {
-  "prop": Object {
-    "path": Array [
-      "field1",
-    ],
-    "type": "map",
-    "value": Object {
-      "field2": Object {
-        "field3": "the-value",
-      },
-    },
-  },
-}
-`;
-
-exports[`should set nested value creating necessary objects 3`] = `
+exports[`should overwrite nested value creating necessary objects 4`] = `
 KvasDataSourceSyncContainer {
   "dataSource": KvasInMemoryJsonDataSource {
     "operations": KvasInMemoryJsonMapOperations {},
@@ -38,7 +50,7 @@ KvasDataSourceSyncContainer {
       "host": Object {
         "field1": Object {
           "field2": Object {
-            "field3": "the-value",
+            "field3": "the-value-2",
           },
         },
       },
