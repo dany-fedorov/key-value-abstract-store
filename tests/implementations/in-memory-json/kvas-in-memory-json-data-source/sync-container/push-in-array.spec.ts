@@ -1,7 +1,7 @@
 import { KvasInMemoryJsonDataSource } from '@in-memory-json/kvas-in-memory-json-data-source';
 
 it('should push to object selecting key automatically', () => {
-  const ds = KvasInMemoryJsonDataSource.createSyncDataStore();
+  const ds = KvasInMemoryJsonDataSource.createSyncDataSource();
   const path = ['b', 'c'];
   const value = 'the-value';
   const { key: key1 } = ds.push(path, value);

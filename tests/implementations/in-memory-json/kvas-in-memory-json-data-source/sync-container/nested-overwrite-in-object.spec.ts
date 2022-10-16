@@ -1,7 +1,7 @@
 import { KvasInMemoryJsonDataSource } from '@in-memory-json/kvas-in-memory-json-data-source';
 
 it('should overwrite nested value creating necessary objects', () => {
-  const ds = KvasInMemoryJsonDataSource.createSyncDataStore();
+  const ds = KvasInMemoryJsonDataSource.createSyncDataSource();
   const path = ['field1', 'field2', 'field3'] as const;
   const value1 = 'the-value-1';
   const value2 = 'the-value-2';

@@ -28,7 +28,7 @@ export class KvasInMemoryJsonDataSource<
   KvasInMemoryJsonMap<P>,
   JsonComposite<P> | P
 > {
-  static createSyncDataStore<P extends JsonPrimitive>(
+  static createSyncDataSource<P extends JsonPrimitive>(
     options?: KvasInMemoryJsonDataSourceCreateOptions<P>,
   ) {
     const dataSource = new KvasDataSourceSyncContainer(
@@ -45,7 +45,7 @@ export class KvasInMemoryJsonDataSource<
     return dataSource;
   }
 
-  static async createAsyncDataStore<P extends JsonPrimitive>(
+  static async createAsyncDataSource<P extends JsonPrimitive>(
     options?: KvasInMemoryJsonDataSourceCreateOptions<P>,
   ) {
     const dataSource = new KvasDataSourceAsyncContainer(
