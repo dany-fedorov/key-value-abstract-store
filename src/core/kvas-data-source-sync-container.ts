@@ -14,7 +14,7 @@ import type {
   KvasSyncOrPromiseResult,
   KvasTypeParameters,
 } from '@core/kvas-types';
-import type { KvasEMap } from '@core/kvas-map';
+import type { KvasEMap, KvasEMapSync } from '@core/kvas-map';
 import type { KvasMap } from '@core/kvas-map';
 
 type AllSync<T extends object> = {
@@ -43,10 +43,35 @@ export class KvasDataSourceSyncContainer<
     return this.dataSource.isInitialized();
   }
 
-  get(path: KvasPath<KTP>): KvasDataSourceGetResult<KTP, KvasEMap<KM, JSO>> {
+  get(
+    path: KvasPath<KTP>,
+  ): KvasDataSourceGetResult<KTP, KvasEMapSync<KM, JSO>> {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
-    return this.dataSource.get(path).sync();
+    const res = this.dataSource.get(path).sync();
+    if (res.prop.type === 'map') {
+      const map = res.prop.value as KvasEMap<KM, JSO>;
+      const origToJSO = map.toJSO;
+      if (typeof origToJSO === 'function') {
+        const newMap = new Proxy(map, {
+          get(target: KM, p: string): any {
+            if (p === 'toJSO') {
+              return function (...args: any) {
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-expect-error
+                return origToJSO.call(this, ...args).sync();
+              };
+            } else {
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-expect-error
+              return target[p];
+            }
+          },
+        });
+        res.prop.value = newMap;
+      }
+    }
+    return res;
   }
 
   set(

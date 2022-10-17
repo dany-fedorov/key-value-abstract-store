@@ -17,7 +17,6 @@ it('should init defaulting to empty object', () => {
             },
           },
           "mapType": "object",
-          "toJSO": [Function],
         },
       },
     }

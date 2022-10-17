@@ -115,7 +115,7 @@ export class KvasInMemoryJsonMapOperations<
   > {
     const sync = () => {
       // return { object: kvasInMemoryJsonMapToDataObjectRecur(kvasMap) };
-      return { jso: kvasMap.host };
+      return kvasMap.host;
     };
     return {
       sync,

@@ -14,4 +14,6 @@ export type JsonPrimitive = string | number | boolean | null;
 export type JsonComposite<P extends JsonPrimitive> =
   | JsonObject<P>
   | JsonArray<P>;
-export type JsonValue<P extends JsonPrimitive> = P | JsonComposite<P>;
+export type JsonValue<P extends JsonPrimitive = JsonPrimitive> =
+  | P
+  | JsonComposite<P>;

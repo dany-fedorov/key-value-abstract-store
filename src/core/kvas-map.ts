@@ -71,7 +71,7 @@ export abstract class KvasMap<KTP extends KvasTypeParameters> {
     };
     const sync = () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error
       const keys = this.listKeys().sync();
       return returnFromKeys(keys);
     };
@@ -87,7 +87,21 @@ export abstract class KvasMap<KTP extends KvasTypeParameters> {
 }
 
 export type KvasEMapMixin<JSO> = {
-  toJSO?(): KvasSyncOrPromiseResult<KvasMapOperationsToObjectResult<JSO>>;
+  toJSO(): KvasSyncOrPromiseResult<KvasMapOperationsToObjectResult<JSO>>;
 };
 
 export type KvasEMap<KM extends KvasMap<any>, JSO> = KM & KvasEMapMixin<JSO>;
+
+export type KvasEMapSyncMixin<JSO> = {
+  toJSO(): KvasMapOperationsToObjectResult<JSO>;
+};
+
+export type KvasEMapSync<KM extends KvasMap<any>, JSO> = KM &
+  KvasEMapSyncMixin<JSO>;
+
+export type KvasEMapAsyncMixin<JSO> = {
+  toJSO(): Promise<KvasMapOperationsToObjectResult<JSO>>;
+};
+
+export type KvasEMapAsync<KM extends KvasMap<any>, JSO> = KM &
+  KvasEMapSyncMixin<JSO>;

@@ -14,7 +14,7 @@ import type {
   KvasSyncOrPromiseResult,
   KvasTypeParameters,
 } from '@core/kvas-types';
-import type { KvasEMap } from '@core/kvas-map';
+import type { KvasEMap, KvasEMapAsync } from '@core/kvas-map';
 import type { KvasMap } from '@core/kvas-map';
 
 type AllAsync<T extends object> = {
@@ -43,10 +43,33 @@ export class KvasDataSourceAsyncContainer<
     return this.dataSource.isInitialized();
   }
 
-  get(
+  async get(
     path: KvasPath<KTP>,
-  ): Promise<KvasDataSourceGetResult<KTP, KvasEMap<KM, JSO>>> {
-    return this.dataSource.get(path).promise();
+  ): Promise<KvasDataSourceGetResult<KTP, KvasEMapAsync<KM, JSO>>> {
+    const res = await this.dataSource.get(path).promise();
+    if (res.prop.type === 'map') {
+      const map = res.prop.value as KvasEMap<KM, JSO>;
+      const origToJSO = map.toJSO;
+      if (typeof origToJSO === 'function') {
+        const newMap = new Proxy(map, {
+          get(target: KM, p: string): any {
+            if (p === 'toJSO') {
+              return async function (...args: any) {
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-expect-error
+                return await origToJSO.call(this, ...args).promise();
+              };
+            } else {
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-expect-error
+              return target[p];
+            }
+          },
+        });
+        res.prop.value = newMap;
+      }
+    }
+    return res;
   }
 
   set(

@@ -16,9 +16,10 @@ import type {
 import { KvasValueType } from '@core/kvas-types';
 import { KvasError } from '@core/kvas-errors';
 
-export type KvasMapOperationsToObjectResult<JSO> = {
-  jso: JSO;
-};
+// export type KvasMapOperationsToObjectResult<JSO> = {
+//   jso: JSO;
+// };
+export type KvasMapOperationsToObjectResult<JSO> = JSO;
 
 export type KvasMapOperationsGetResult<
   KTP extends KvasTypeParameters,
@@ -97,26 +98,70 @@ function inPathSync<
   if (path.length === 0) {
     return cb(map);
   }
-  const { lastFoundMapProp } = (
-    ops.queryPath(map, path) as KvasSyncResult<
-      KvasMapOperationsQueryResult<KTP, KM>
-    >
-  ).sync();
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
+  const { lastFoundMapProp } = ops.queryPath(map, path).sync();
   if (
     lastFoundMapProp.path.length ===
     (!sliceLast ? path.length : path.length - 1)
   ) {
     return cb(lastFoundMapProp.value);
-    // lastFoundMapProp.value.setKey(path[path.length - 1], value)?.sync?.();
   }
   const pathToCreateMapsIn = path.slice(
     lastFoundMapProp.path.length,
     !sliceLast ? path.length : path.length - 1,
   );
-  // console.log('path', path);
-  // console.log('pathToCreateMapsIn', pathToCreateMapsIn);
   let curMap: KM = lastFoundMapProp.value;
-  pathToCreateMapsIn.forEach((pathSegment, i) => {
+  for (let i = 0; i < pathToCreateMapsIn.length; i++) {
+    const pathSegment = pathToCreateMapsIn[i];
+    const nextPathSegment = path[lastFoundMapProp.path.length + i + 1];
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    const newMap = ops
+      .createMap({
+        forHostKey: pathSegment,
+        forKeyInside:
+          nextPathSegment !== undefined ? nextPathSegment : defaultForKeyInside,
+      })
+      .sync();
+    (
+      curMap.setKey(pathSegment, newMap) as KvasSyncResult<KvasMapSetKeyResult>
+    ).sync();
+    curMap = newMap;
+  }
+  return cb(curMap);
+}
+
+async function inPathAsync<
+  KTP extends KvasTypeParameters,
+  KM extends KvasMap<KTP>,
+  JSO,
+  T,
+>(
+  ops: KvasMapOperations<KTP, KM, JSO>,
+  map: KM,
+  path: KvasPath<KTP>,
+  sliceLast: boolean,
+  defaultForKeyInside: KTP['Key'] | undefined,
+  cb: (m: KM) => Promise<T>,
+): Promise<T> {
+  if (path.length === 0) {
+    return cb(map);
+  }
+  const { lastFoundMapProp } = await ops.queryPath(map, path).promise();
+  if (
+    lastFoundMapProp.path.length ===
+    (!sliceLast ? path.length : path.length - 1)
+  ) {
+    return cb(lastFoundMapProp.value);
+  }
+  const pathToCreateMapsIn = path.slice(
+    lastFoundMapProp.path.length,
+    !sliceLast ? path.length : path.length - 1,
+  );
+  let curMap: KM = lastFoundMapProp.value;
+  for (let i = 0; i < pathToCreateMapsIn.length; i++) {
+    const pathSegment = pathToCreateMapsIn[i];
     const nextPathSegment = path[lastFoundMapProp.path.length + i + 1];
     const newMap = (
       ops.createMap({
@@ -129,34 +174,27 @@ function inPathSync<
       curMap.setKey(pathSegment, newMap) as KvasSyncResult<KvasMapSetKeyResult>
     ).sync();
     curMap = newMap;
-  });
+  }
   return cb(curMap);
-  // (
-  //   curMap.setKey(
-  //     path[path.length - 1],
-  //     value,
-  //   ) as KvasSyncResult<KvasMapSetKeyResult>
-  // ).sync();
-  // return {};
 }
 
-/**
- * Optional abstract methods
- */
-export interface KvasMapOperations<
-  KTP extends KvasTypeParameters,
-  KM extends KvasMap<KTP>,
-  JSO,
-> {
-  fromJSO?(
-    jso: JSO,
-    ...rest: any[]
-  ): KvasSyncOrPromiseResult<KvasMapOperationsFromJsResult<KTP, KM>>;
-
-  toJSO?(
-    kvasMap: KM | KTP['PrimitiveValue'],
-  ): KvasSyncOrPromiseResult<KvasMapOperationsToObjectResult<JSO>>;
-}
+// /**
+//  * Optional abstract methods
+//  */
+// export interface KvasMapOperations<
+//   KTP extends KvasTypeParameters,
+//   KM extends KvasMap<KTP>,
+//   JSO,
+// > {
+//   fromJSO?(
+//     jso: JSO,
+//     ...rest: any[]
+//   ): KvasSyncOrPromiseResult<KvasMapOperationsFromJsResult<KTP, KM>>;
+//
+//   toJSO?(
+//     kvasMap: KM | KTP['PrimitiveValue'],
+//   ): KvasSyncOrPromiseResult<KvasMapOperationsToObjectResult<JSO>>;
+// }
 
 type KvasMapOperationsQueryPathState<
   KTP extends KvasTypeParameters,
@@ -299,7 +337,7 @@ export abstract class KvasMapOperations<
         const pathSegment = path[i] as KTP['Key'];
         state.curPath.push(pathSegment);
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
+        // @ts-expect-error
         const { value, type } = state.lastFoundPropMapValue
           .getKey(pathSegment)
           .sync();
@@ -347,26 +385,42 @@ export abstract class KvasMapOperations<
           found: false,
         };
       }
-      const { prop, lastFoundMapProp } = (
-        this.queryPath(map, path) as KvasSyncResult<
-          KvasMapOperationsQueryResult<KTP, KM>
-        >
-      ).sync();
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      const { prop, lastFoundMapProp } = this.queryPath(map, path).sync();
       if (prop === undefined) {
         return {
           found: false,
         };
       }
-      return (
-        lastFoundMapProp.value.deleteKey(
-          path[path.length - 1] as KTP['Key'],
-        ) as KvasSyncResult<KvasMapDeleteKeyResult>
-      ).sync();
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      return lastFoundMapProp.value
+        .deleteKey(path[path.length - 1] as KTP['Key'])
+        .sync();
+    };
+    const promise = async () => {
+      if (path.length === 0) {
+        return {
+          found: false,
+        };
+      }
+      const { prop, lastFoundMapProp } = await this.queryPath(
+        map,
+        path,
+      ).promise();
+      if (prop === undefined) {
+        return {
+          found: false,
+        };
+      }
+      return await lastFoundMapProp.value
+        .deleteKey(path[path.length - 1] as KTP['Key'])
+        .promise();
     };
     return {
       sync,
-      // TODO
-      promise: () => Promise.resolve(sync()),
+      promise,
     };
   }
 
@@ -378,7 +432,18 @@ export abstract class KvasMapOperations<
       const self = this;
       return {
         ...prop,
-        value: Object.assign(
+        value: new Proxy(prop.value as KM, {
+          get(target: KM, p: string): any {
+            if (p === 'toJSO' && self.toJSO) {
+              return self.toJSO.bind(self, target);
+            } else {
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-expect-error
+              return target[p];
+            }
+          },
+        }),
+        /*Object.assign(
           prop.value as KM,
           !self.toJSO
             ? {}
@@ -387,11 +452,11 @@ export abstract class KvasMapOperations<
                   KvasMapOperationsToObjectResult<JSO>
                 > {
                   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore
+                  // @ts-expect-error
                   return self.toJSO(this);
                 },
               },
-        ),
+        )*/
       };
     } else {
       return prop;
@@ -412,11 +477,30 @@ export abstract class KvasMapOperations<
           }),
         };
       }
-      const { prop } = (
-        this.queryPath(map, path) as KvasSyncResult<
-          KvasMapOperationsQueryResult<KTP, KM>
-        >
-      ).sync();
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      const { prop } = this.queryPath(map, path).sync();
+      return prop
+        ? { prop: this.mapInPropToEMap(prop) }
+        : {
+            prop: {
+              path,
+              value: undefined,
+              type: undefined,
+            },
+          };
+    };
+    const promise = async () => {
+      if (path.length === 0) {
+        return {
+          prop: this.mapInPropToEMap({
+            value: map,
+            path,
+            type: KvasValueType.MAP,
+          }),
+        };
+      }
+      const { prop } = await this.queryPath(map, path).promise();
       return prop
         ? { prop: this.mapInPropToEMap(prop) }
         : {
@@ -429,8 +513,7 @@ export abstract class KvasMapOperations<
     };
     return {
       sync,
-      // TODO
-      promise: () => Promise.resolve(sync()),
+      promise,
     };
   }
 
@@ -444,14 +527,24 @@ export abstract class KvasMapOperations<
         throw new KvasError('Cannot set in []');
       }
       inPathSync(this, map, path, true, undefined, (m: KM) => {
-        m.setKey(path[path.length - 1], value)?.sync?.();
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        return m.setKey(path[path.length - 1], value).sync();
+      });
+      return {};
+    };
+    const promise = async () => {
+      if (path.length === 0) {
+        throw new KvasError('Cannot set in []');
+      }
+      await inPathAsync(this, map, path, true, undefined, (m: KM) => {
+        return m.setKey(path[path.length - 1], value).promise();
       });
       return {};
     };
     return {
       sync,
-      // TODO
-      promise: () => Promise.resolve(sync()),
+      promise,
     };
   }
 
@@ -462,11 +555,9 @@ export abstract class KvasMapOperations<
     KvasMapOperationsGetJSOInPathResult<KTP, JSO, KM>
   > {
     const sync = () => {
-      const { prop } = (
-        this.getInPath(map, path) as KvasSyncResult<
-          KvasMapOperationsGetResult<KTP, KM>
-        >
-      ).sync();
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      const { prop } = this.getInPath(map, path).sync();
       if (!this.toJSO) {
         throw new KvasError('Cannot toJSO');
       }
@@ -479,11 +570,31 @@ export abstract class KvasMapOperations<
           >['prop'],
         };
       }
-      const { jso: newVal } = (
-        this.toJSO(prop.value) as KvasSyncResult<
-          KvasMapOperationsToObjectResult<JSO>
-        >
-      ).sync();
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      const newVal = this.toJSO(prop.value).sync();
+      return {
+        prop: {
+          ...prop,
+          value: newVal,
+        },
+      };
+    };
+    const promise = async () => {
+      const { prop } = await this.getInPath(map, path).promise();
+      if (!this.toJSO) {
+        throw new KvasError('Cannot toJSO');
+      }
+      if (prop.type === KvasValueType.PRIMITIVE || prop.type === undefined) {
+        return {
+          prop: prop as KvasMapOperationsGetJSOInPathResult<
+            KTP,
+            JSO,
+            KM
+          >['prop'],
+        };
+      }
+      const newVal = await this.toJSO(prop.value).promise();
       return {
         prop: {
           ...prop,
@@ -493,7 +604,7 @@ export abstract class KvasMapOperations<
     };
     return {
       sync,
-      promise: () => Promise.resolve(sync()),
+      promise,
     };
   }
 
@@ -506,19 +617,23 @@ export abstract class KvasMapOperations<
       if (!this.fromJSO) {
         throw new KvasError('Cannot fromJSO');
       }
-      const kvasMapOrPrimitive = this.fromJSO(jso)?.sync?.()?.value;
-      return (
-        this.setInPath(
-          map,
-          path,
-          kvasMapOrPrimitive,
-        ) as KvasSyncResult<KvasMapOperationsSetResult>
-      ).sync();
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      const kvasMapOrPrimitive = this.fromJSO(jso).sync().value;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      return this.setInPath(map, path, kvasMapOrPrimitive).sync();
+    };
+    const promise = async () => {
+      if (!this.fromJSO) {
+        throw new KvasError('Cannot fromJSO');
+      }
+      const kvasMapOrPrimitive = (await this.fromJSO(jso).promise()).value;
+      return await this.setInPath(map, path, kvasMapOrPrimitive).promise();
     };
     return {
       sync,
-      // TODO:
-      promise: () => Promise.resolve(sync()),
+      promise,
     };
   }
 
@@ -529,17 +644,21 @@ export abstract class KvasMapOperations<
   ): KvasSyncOrPromiseResult<KvasMapOperationsPushInPathResult<KTP>> {
     const sync = () => {
       return inPathSync(this, map, path, false, 0, (m: KM) => {
-        // console.log(m);
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        const { key } = m.push(value)?.sync?.();
+        // @ts-expect-error
+        const { key } = m.push(value).sync();
+        return { key };
+      });
+    };
+    const promise = () => {
+      return inPathAsync(this, map, path, false, 0, async (m: KM) => {
+        const { key } = await m.push(value).promise();
         return { key };
       });
     };
     return {
       sync,
-      // TODO:
-      promise: () => Promise.resolve(sync()),
+      promise,
     };
   }
 
@@ -552,17 +671,34 @@ export abstract class KvasMapOperations<
       if (!this.fromJSO) {
         throw new KvasError('Cannot fromJSO');
       }
-      const kvasMapOrPrimitive = this.fromJSO(jso)?.sync?.()?.value;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      const kvasMapOrPrimitive = this.fromJSO(jso).sync().value;
       return (
         this.pushInPath(map, path, kvasMapOrPrimitive) as KvasSyncResult<
           KvasMapOperationsPushInPathResult<KTP>
         >
       ).sync();
     };
+    const promise = async () => {
+      if (!this.fromJSO) {
+        throw new KvasError('Cannot fromJSO');
+      }
+      const kvasMapOrPrimitive = (await this.fromJSO(jso).promise()).value;
+      return await this.pushInPath(map, path, kvasMapOrPrimitive).promise();
+    };
     return {
       sync,
-      // TODO:
-      promise: () => Promise.resolve(sync()),
+      promise,
     };
   }
+
+  abstract fromJSO(
+    jso: JSO,
+    ...rest: any[]
+  ): KvasSyncOrPromiseResult<KvasMapOperationsFromJsResult<KTP, KM>>;
+
+  abstract toJSO(
+    kvasMap: KM | KTP['PrimitiveValue'],
+  ): KvasSyncOrPromiseResult<KvasMapOperationsToObjectResult<JSO>>;
 }

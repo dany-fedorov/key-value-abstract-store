@@ -47,7 +47,7 @@ export const jsonStringifySafe = (
     KvasInMemoryJsonMap<P>
   >(dataObject, {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    // @ts-expect-error
     assembleObject: (processedChildren, { key }) => {
       // console.log('assembleObject', key, processedChildren);
       if (key === __REWRITE_OBJECT_DEFAULT_ROOT_KEY__) {
@@ -68,7 +68,7 @@ export const jsonStringifySafe = (
       return m;
     },
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    // @ts-expect-error
     assembleArray: (processedChildren, { key }) => {
       // console.log('assembleArray', key, processedChildren);
       if (key === __REWRITE_OBJECT_DEFAULT_ROOT_KEY__) {

@@ -126,7 +126,7 @@ export class KvasInMemoryJsonMap<P extends JsonPrimitive> extends KvasMap<
     };
     this.host = data instanceof KvasInMemoryJsonMap ? data.host : data;
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    // @ts-expect-error
     delete this.icfg.data;
   }
 
@@ -217,7 +217,7 @@ export class KvasInMemoryJsonMap<P extends JsonPrimitive> extends KvasMap<
         // @ts-expect-error
         this.host[key] = KvasInMemoryJsonMapOperations.prototype
           .toJSO(value)
-          .sync().jso;
+          .sync();
       } else {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
@@ -284,14 +284,14 @@ export class KvasInMemoryJsonMap<P extends JsonPrimitive> extends KvasMap<
         .sort();
       const _k =
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
+        // @ts-expect-error
         numKeys.length === 0
           ? 0
           : // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
+            // @ts-expect-error
             (numKeys[
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
+              // @ts-expect-error
               numKeys.length - 1
             ] as KvasInMemoryJsonTypeParameters<P>['Key']) + 1;
       let k = _k;
