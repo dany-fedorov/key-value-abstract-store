@@ -6,14 +6,13 @@ import type {
   KvasMapOperations,
   KvasMapOperationsGetJSOInPathResult,
   KvasMapOperationsSetJSOInPathResult,
-  CreateMapOptions,
+  KvasMapOperationsCreateMapOptions,
   KvasMapOperationsPushInPathResult,
   KvasMapOperationsPushJSOInPathResult,
 } from '@core/kvas-map-operations';
 import type {
   KvasPath,
   KvasSyncOrPromiseResult,
-  KvasSyncResult,
   KvasTypeParameters,
 } from '@core/kvas-types';
 import { KvasError } from '@core/kvas-errors';
@@ -41,7 +40,10 @@ export type KvasDataSourceInitializeOptions<
   KTP extends KvasTypeParameters,
   KM extends KvasMap<KTP>,
   JSO,
-> = Pick<CreateMapOptions<KTP, JSO, KM>, 'fromMap' | 'fromJSO'>;
+> = Pick<
+  KvasMapOperationsCreateMapOptions<KTP, JSO, KM>,
+  'fromMap' | 'fromJSO'
+>;
 
 export class KvasDataSource<
   KTP extends KvasTypeParameters,
@@ -61,7 +63,9 @@ export class KvasDataSource<
         ...(options || {}),
       });
     const sync = () => {
-      this.rootMap = (createMap() as unknown as KvasSyncResult<KM>).sync();
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      this.rootMap = createMap().sync();
     };
     const promise = async () => {
       this.rootMap = await createMap().promise();

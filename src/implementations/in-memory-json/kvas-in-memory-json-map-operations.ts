@@ -4,7 +4,7 @@ import type {
   JsonValue,
 } from '@in-memory-json/kvas-in-memory-json-types';
 import {
-  CreateMapOptions,
+  KvasMapOperationsCreateMapOptions,
   KvasMapOperations,
   KvasMapOperationsFromJsResult,
   KvasMapOperationsToObjectResult,
@@ -36,7 +36,7 @@ export class KvasInMemoryJsonMapOperations<
   JsonValue<P>
 > {
   createMap(
-    options?: CreateMapOptions<
+    options?: KvasMapOperationsCreateMapOptions<
       KvasInMemoryJsonTypeParameters<P>,
       JsonComposite<P>,
       KvasInMemoryJsonMap<P>

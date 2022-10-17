@@ -60,8 +60,7 @@ export abstract class KvasMap<KTP extends KvasTypeParameters> {
   ): KvasSyncOrPromiseResult<KvasMapPushResult<KTP>>;
 
   listEntries(): KvasSyncOrPromiseResult<KvasMapEntry<KTP>[]> {
-    const sync = () => {
-      const keys = this.listKeys().sync?.();
+    const returnFromKeys = (keys: KTP['Key'][]) => {
       if (!keys) {
         throw new KvasError('listKeys is not implemented');
       }
@@ -70,10 +69,19 @@ export abstract class KvasMap<KTP extends KvasTypeParameters> {
         value: this.getKey(k).sync?.(),
       }));
     };
+    const sync = () => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const keys = this.listKeys().sync();
+      return returnFromKeys(keys);
+    };
+    const promise = async () => {
+      const keys = await this.listKeys().promise();
+      return returnFromKeys(keys);
+    };
     return {
       sync,
-      // TODO
-      promise: () => Promise.resolve(sync()),
+      promise,
     };
   }
 }

@@ -2,7 +2,6 @@ import type {
   KvasEMap,
   KvasMap,
   KvasMapDeleteKeyResult,
-  KvasMapGetKeyResult,
   KvasMapPushResult,
   KvasMapSetKeyResult,
   KvasProp,
@@ -32,7 +31,7 @@ export type KvasMapOperationsSetResult = KvasMapSetKeyResult;
 
 export type KvasMapOperationsDeleteResult = KvasMapDeleteKeyResult;
 
-export type CreateMapOptions<
+export type KvasMapOperationsCreateMapOptions<
   KTP extends KvasTypeParameters,
   JSO,
   KM extends KvasMap<KTP>,
@@ -159,120 +158,182 @@ export interface KvasMapOperations<
   ): KvasSyncOrPromiseResult<KvasMapOperationsToObjectResult<JSO>>;
 }
 
+type KvasMapOperationsQueryPathState<
+  KTP extends KvasTypeParameters,
+  KM extends KvasMap<KTP>,
+> = {
+  lastFoundPropPath: KvasPathWritable<KTP>;
+  lastFoundPropValue: KM | KTP['PrimitiveValue'];
+  lastFoundPropType: KvasValueType;
+  lastFoundPropMapPath: KvasPathWritable<KTP>;
+  lastFoundPropMapValue: KM;
+  curPath: KvasPathWritable<KTP>;
+};
+
 export abstract class KvasMapOperations<
   KTP extends KvasTypeParameters,
   KM extends KvasMap<KTP>,
   JSO,
 > {
   abstract createMap(
-    options?: CreateMapOptions<KTP, JSO, KM>,
+    options?: KvasMapOperationsCreateMapOptions<KTP, JSO, KM>,
   ): KvasSyncOrPromiseResult<KM>;
 
   queryPath(
     map: KM,
     path: KvasPath<KTP>,
   ): KvasSyncOrPromiseResult<KvasMapOperationsQueryResult<KTP, KM>> {
-    const sync: () => KvasMapOperationsQueryResult<KTP, KM> = () => {
-      if (path.length === 0) {
+    const returnOnEmptyPath = (): KvasMapOperationsQueryResult<KTP, KM> => {
+      const prop = {
+        type: KvasValueType.MAP,
+        path,
+        value: map,
+      };
+      return {
+        prop,
+        lastFoundProp: prop,
+        lastFoundMapProp: { ...prop, type: KvasValueType.MAP }, // For TypeScript
+      };
+    };
+    const initState = (): KvasMapOperationsQueryPathState<KTP, KM> => {
+      const state: KvasMapOperationsQueryPathState<KTP, KM> = {
+        lastFoundPropPath: [],
+        lastFoundPropValue: map,
+        lastFoundPropType: KvasValueType.MAP,
+        lastFoundPropMapPath: [],
+        lastFoundPropMapValue: map,
+        curPath: [],
+      };
+      return state;
+    };
+    const processKey = (
+      i: number,
+      type: KvasValueType | undefined,
+      value: KTP['PrimitiveValue'] | KM | undefined,
+      state: KvasMapOperationsQueryPathState<KTP, KM>,
+    ): {
+      returnMe: KvasMapOperationsQueryResult<KTP, KM> | null;
+    } => {
+      const isPrimitive = type === KvasValueType.PRIMITIVE;
+      const isMap = type === KvasValueType.MAP;
+      const isLast = i === path.length - 1;
+      if (isPrimitive && isLast) {
         const prop = {
-          type: KvasValueType.MAP,
+          value,
+          type,
           path,
-          value: map,
         };
         return {
-          prop,
-          lastFoundProp: prop,
-          lastFoundMapProp: { ...prop, type: KvasValueType.MAP }, // For TypeScript
-        };
-      }
-      let lastFoundPropPath: KvasPathWritable<KTP> = [];
-      // eslint-disable-next-line @typescript-eslint/no-this-alias
-      let lastFoundPropValue: KM | KTP['PrimitiveValue'] = map;
-      let lastFoundPropType: KvasValueType = KvasValueType.MAP;
-      let lastFoundPropMapPath: KvasPathWritable<KTP> = [];
-      // eslint-disable-next-line @typescript-eslint/no-this-alias
-      let lastFoundPropMapValue: KM = map;
-      const curPath: KvasPathWritable<KTP> = [];
-      for (let i = 0; i < path.length; i++) {
-        const pathSegment = path[i] as KTP['Key'];
-        curPath.push(pathSegment);
-        const { value, type } = (
-          lastFoundPropMapValue.getKey(pathSegment) as KvasSyncResult<
-            KvasMapGetKeyResult<KTP>
-          >
-        ).sync();
-        const isPrimitive = type === KvasValueType.PRIMITIVE;
-        const isMap = type === KvasValueType.MAP;
-        const isLast = i === path.length - 1;
-        if (isPrimitive && isLast) {
-          const prop = {
-            value,
-            type,
-            path,
-          };
-          return {
+          returnMe: {
             prop,
             lastFoundProp: prop,
             lastFoundMapProp: {
               type: KvasValueType.MAP,
-              value: lastFoundPropMapValue,
-              path: lastFoundPropMapPath,
+              value: state.lastFoundPropMapValue,
+              path: state.lastFoundPropMapPath,
             },
-          };
-        } else if (isPrimitive && !isLast) {
-          return {
+          },
+        };
+      } else if (isPrimitive && !isLast) {
+        return {
+          returnMe: {
             prop: undefined,
             lastFoundProp: {
               type: KvasValueType.PRIMITIVE,
               value,
-              path: curPath,
+              path: state.curPath,
             },
             lastFoundMapProp: {
               type: KvasValueType.MAP,
-              value: lastFoundPropMapValue,
-              path: lastFoundPropMapPath,
+              value: state.lastFoundPropMapValue,
+              path: state.lastFoundPropMapPath,
             },
-          };
-        } else if (isMap && isLast) {
-          const prop = {
-            value: value as KM,
-            type: KvasValueType.MAP,
-            path,
-          };
-          return {
+          },
+        };
+      } else if (isMap && isLast) {
+        const prop = {
+          value: value as KM,
+          type: KvasValueType.MAP,
+          path,
+        };
+        return {
+          returnMe: {
             prop,
             lastFoundProp: prop,
             lastFoundMapProp: { ...prop, type: KvasValueType.MAP }, // For TypeScript
-          };
-        } else if (isMap && !isLast) {
-          lastFoundPropMapValue = value as KM;
-          lastFoundPropMapPath = curPath.slice();
-          lastFoundPropValue = value as KM;
-          lastFoundPropType = type;
-          lastFoundPropPath = curPath.slice();
-        } else {
-          return {
+          },
+        };
+      } else if (isMap && !isLast) {
+        state.lastFoundPropMapValue = value as KM;
+        state.lastFoundPropMapPath = state.curPath.slice();
+        state.lastFoundPropValue = value as KM;
+        state.lastFoundPropType = type;
+        state.lastFoundPropPath = state.curPath.slice();
+        return {
+          returnMe: null,
+        };
+      } else {
+        return {
+          returnMe: {
             prop: undefined,
             lastFoundProp: {
-              type: lastFoundPropType,
-              value: lastFoundPropValue,
-              path: lastFoundPropPath,
+              type: state.lastFoundPropType,
+              value: state.lastFoundPropValue,
+              path: state.lastFoundPropPath,
             },
             lastFoundMapProp: {
               type: KvasValueType.MAP,
-              value: lastFoundPropMapValue,
-              path: lastFoundPropMapPath,
+              value: state.lastFoundPropMapValue,
+              path: state.lastFoundPropMapPath,
             },
-          };
+          },
+        };
+      }
+    };
+    const sync: () => KvasMapOperationsQueryResult<KTP, KM> = () => {
+      if (path.length === 0) {
+        return returnOnEmptyPath();
+      }
+      const state = initState();
+      for (let i = 0; i < path.length; i++) {
+        const pathSegment = path[i] as KTP['Key'];
+        state.curPath.push(pathSegment);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const { value, type } = state.lastFoundPropMapValue
+          .getKey(pathSegment)
+          .sync();
+        const { returnMe } = processKey(i, type, value, state);
+        if (returnMe !== null) {
+          return returnMe;
         }
       }
-      throw new Error('For TypeScript');
+      throw new KvasError('For TypeScript');
+    };
+    const promise: () => Promise<
+      KvasMapOperationsQueryResult<KTP, KM>
+    > = async () => {
+      if (path.length === 0) {
+        return returnOnEmptyPath();
+      }
+      const state = initState();
+      for (let i = 0; i < path.length; i++) {
+        const pathSegment = path[i] as KTP['Key'];
+        state.curPath.push(pathSegment);
+        const { value, type } = await state.lastFoundPropMapValue
+          .getKey(pathSegment)
+          .promise();
+        const { returnMe } = processKey(i, type, value, state);
+        if (returnMe !== null) {
+          return returnMe;
+        }
+      }
+      throw new KvasError('For TypeScript');
     };
 
     return {
       sync,
-      // TODO
-      promise: () => Promise.resolve(sync()),
+      promise,
     };
   }
 
