@@ -1,5 +1,5 @@
 import { KvasInMemoryJsonDataSource } from '@in-memory-json/kvas-in-memory-json-data-source';
-import type { KvasEMapSync, KvasEMapSyncMixin } from '@core/kvas-map';
+import type { KvasEMapSyncMixin } from '@core/kvas-map';
 import { KvasInMemoryJsonMap } from '@in-memory-json/kvas-in-memory-json-map';
 import type { JsonValue } from '@in-memory-json/kvas-in-memory-json-types';
 import { jsonStringifySafe } from '@in-memory-json/kvas-in-memory-json-utils';

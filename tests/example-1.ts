@@ -1,7 +1,7 @@
 import { KvasInMemoryJsonDataSource } from '@in-memory-json/kvas-in-memory-json-data-source';
 import { jsonStringifySafe } from '@in-memory-json/kvas-in-memory-json-utils';
 
-const test1 = () => {
+const example1 = () => {
   const ds = KvasInMemoryJsonDataSource.createSyncDataSource();
   ds.setJSO(['b', 0], 'value-1'); // JSO for JS Object
   ds.setJSO(['b', 1, 'c'], 'value-2');
@@ -29,4 +29,4 @@ const test1 = () => {
    */
 };
 
-test1();
+example1();
