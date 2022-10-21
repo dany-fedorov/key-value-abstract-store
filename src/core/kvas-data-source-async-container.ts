@@ -44,7 +44,7 @@ export class KvasDataSourceAsyncContainer<
   }
 
   async get(
-    path: KvasPath<KTP>,
+    path: KvasPath<KTP['Key']>,
   ): Promise<KvasDataSourceGetResult<KTP, KvasEMapAsync<KM, JSO>>> {
     const res = await this.dataSource.get(path).promise();
     if (res.prop.type === 'map') {
@@ -73,35 +73,38 @@ export class KvasDataSourceAsyncContainer<
   }
 
   set(
-    path: KvasPath<KTP>,
+    path: KvasPath<KTP['Key']>,
     value: KTP['PrimitiveValue'] | KM,
   ): Promise<KvasDataSourceSetResult> {
     return this.dataSource.set(path, value).promise();
   }
 
-  delete(path: KvasPath<KTP>): Promise<KvasDataSourceDeleteResult> {
+  delete(path: KvasPath<KTP['Key']>): Promise<KvasDataSourceDeleteResult> {
     return this.dataSource.delete(path).promise();
   }
 
   getJSO(
-    path: KvasPath<KTP>,
+    path: KvasPath<KTP['Key']>,
   ): Promise<KvasDataSourceGetJSOResult<KTP, KM, JSO>> {
     return this.dataSource.getJSO(path).promise();
   }
 
-  setJSO(path: KvasPath<KTP>, jso: JSO): Promise<KvasDataSourceSetJSOResult> {
+  setJSO(
+    path: KvasPath<KTP['Key']>,
+    jso: JSO,
+  ): Promise<KvasDataSourceSetJSOResult> {
     return this.dataSource.setJSO(path, jso).promise();
   }
 
   push(
-    path: KvasPath<KTP>,
+    path: KvasPath<KTP['Key']>,
     value: KTP['PrimitiveValue'] | KM,
   ): Promise<KvasDataSourcePushResult<KTP>> {
     return this.dataSource.push(path, value).promise();
   }
 
   pushJSO(
-    path: KvasPath<KTP>,
+    path: KvasPath<KTP['Key']>,
     jso: JSO,
   ): Promise<KvasDataSourcePushJSOResult<KTP>> {
     return this.dataSource.pushJSO(path, jso).promise();

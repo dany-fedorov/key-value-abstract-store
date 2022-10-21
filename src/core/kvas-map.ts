@@ -8,7 +8,7 @@ import { KvasError } from '@core/kvas-errors';
 import type { KvasMapOperationsToObjectResult } from '@core/kvas-map-operations';
 
 export type KvasProp<KTP extends KvasTypeParameters, KM = KvasMap<KTP>> = {
-  path: KvasPath<KTP>;
+  path: KvasPath<KTP['Key']>;
   type: KvasValueType | undefined;
   value: KTP['PrimitiveValue'] | KM | undefined;
 };

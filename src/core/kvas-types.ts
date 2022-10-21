@@ -17,9 +17,9 @@ export type KvasSyncOrPromiseResult<T> =
   | KvasPromiseResult<T>
   | KvasSyncResult<T>;
 
-export type KvasPathWritable<KTP extends KvasTypeParameters> = KTP['Key'][];
+export type KvasPathWritable<K> = K[];
 
-export type KvasPath<KTP extends KvasTypeParameters> = readonly KTP['Key'][];
+export type KvasPath<K> = readonly K[];
 
 export enum KvasValueType {
   PRIMITIVE = 'primitive',

@@ -87,14 +87,14 @@ export class KvasDataSource<
   }
 
   get(
-    path: KvasPath<KTP>,
+    path: KvasPath<KTP['Key']>,
   ): KvasSyncOrPromiseResult<KvasDataSourceGetResult<KTP, KvasEMap<KM, JSO>>> {
     this.checkIsInitialized();
     return this.operations.getInPath(this.rootMap as KM, path);
   }
 
   set(
-    path: KvasPath<KTP>,
+    path: KvasPath<KTP['Key']>,
     value: KTP['PrimitiveValue'] | KM,
   ): KvasSyncOrPromiseResult<KvasDataSourceSetResult> {
     this.checkIsInitialized();
@@ -102,21 +102,21 @@ export class KvasDataSource<
   }
 
   delete(
-    path: KvasPath<KTP>,
+    path: KvasPath<KTP['Key']>,
   ): KvasSyncOrPromiseResult<KvasDataSourceDeleteResult> {
     this.checkIsInitialized();
     return this.operations.deleteInPath(this.rootMap as KM, path);
   }
 
   getJSO(
-    path: KvasPath<KTP>,
+    path: KvasPath<KTP['Key']>,
   ): KvasSyncOrPromiseResult<KvasDataSourceGetJSOResult<KTP, KM, JSO>> {
     this.checkIsInitialized();
     return this.operations.getJSOInPath(this.rootMap as KM, path);
   }
 
   setJSO(
-    path: KvasPath<KTP>,
+    path: KvasPath<KTP['Key']>,
     jso: JSO,
   ): KvasSyncOrPromiseResult<KvasDataSourceSetJSOResult> {
     this.checkIsInitialized();
@@ -124,7 +124,7 @@ export class KvasDataSource<
   }
 
   push(
-    path: KvasPath<KTP>,
+    path: KvasPath<KTP['Key']>,
     value: KTP['PrimitiveValue'] | KM,
   ): KvasSyncOrPromiseResult<KvasDataSourcePushResult<KTP>> {
     this.checkIsInitialized();
@@ -132,7 +132,7 @@ export class KvasDataSource<
   }
 
   pushJSO(
-    path: KvasPath<KTP>,
+    path: KvasPath<KTP['Key']>,
     jso: JSO,
   ): KvasSyncOrPromiseResult<KvasDataSourcePushJSOResult<KTP>> {
     this.checkIsInitialized();

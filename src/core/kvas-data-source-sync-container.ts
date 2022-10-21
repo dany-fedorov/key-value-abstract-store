@@ -44,7 +44,7 @@ export class KvasDataSourceSyncContainer<
   }
 
   get(
-    path: KvasPath<KTP>,
+    path: KvasPath<KTP['Key']>,
   ): KvasDataSourceGetResult<KTP, KvasEMapSync<KM, JSO>> {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
@@ -75,7 +75,7 @@ export class KvasDataSourceSyncContainer<
   }
 
   set(
-    path: KvasPath<KTP>,
+    path: KvasPath<KTP['Key']>,
     value: KTP['PrimitiveValue'] | KM,
   ): KvasDataSourceSetResult {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -83,26 +83,26 @@ export class KvasDataSourceSyncContainer<
     return this.dataSource.set(path, value).sync();
   }
 
-  delete(path: KvasPath<KTP>): KvasDataSourceDeleteResult {
+  delete(path: KvasPath<KTP['Key']>): KvasDataSourceDeleteResult {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     return this.dataSource.delete(path).sync();
   }
 
-  getJSO(path: KvasPath<KTP>): KvasDataSourceGetJSOResult<KTP, KM, JSO> {
+  getJSO(path: KvasPath<KTP['Key']>): KvasDataSourceGetJSOResult<KTP, KM, JSO> {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     return this.dataSource.getJSO(path).sync();
   }
 
-  setJSO(path: KvasPath<KTP>, jso: JSO): KvasDataSourceSetJSOResult {
+  setJSO(path: KvasPath<KTP['Key']>, jso: JSO): KvasDataSourceSetJSOResult {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     return this.dataSource.setJSO(path, jso).sync();
   }
 
   push(
-    path: KvasPath<KTP>,
+    path: KvasPath<KTP['Key']>,
     value: KTP['PrimitiveValue'] | KM,
   ): KvasDataSourcePushResult<KTP> {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -110,7 +110,10 @@ export class KvasDataSourceSyncContainer<
     return this.dataSource.push(path, value).sync();
   }
 
-  pushJSO(path: KvasPath<KTP>, jso: JSO): KvasDataSourcePushJSOResult<KTP> {
+  pushJSO(
+    path: KvasPath<KTP['Key']>,
+    jso: JSO,
+  ): KvasDataSourcePushJSOResult<KTP> {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     return this.dataSource.pushJSO(path, jso).sync();

@@ -90,7 +90,7 @@ function inPathSync<
 >(
   ops: KvasMapOperations<KTP, KM, JSO>,
   map: KM,
-  path: KvasPath<KTP>,
+  path: KvasPath<KTP['Key']>,
   sliceLast: boolean,
   defaultForKeyInside: KTP['Key'] | undefined,
   cb: (m: KM) => T,
@@ -140,7 +140,7 @@ async function inPathAsync<
 >(
   ops: KvasMapOperations<KTP, KM, JSO>,
   map: KM,
-  path: KvasPath<KTP>,
+  path: KvasPath<KTP['Key']>,
   sliceLast: boolean,
   defaultForKeyInside: KTP['Key'] | undefined,
   cb: (m: KM) => Promise<T>,
@@ -200,12 +200,12 @@ type KvasMapOperationsQueryPathState<
   KTP extends KvasTypeParameters,
   KM extends KvasMap<KTP>,
 > = {
-  lastFoundPropPath: KvasPathWritable<KTP>;
+  lastFoundPropPath: KvasPathWritable<KTP['Key']>;
   lastFoundPropValue: KM | KTP['PrimitiveValue'];
   lastFoundPropType: KvasValueType;
-  lastFoundPropMapPath: KvasPathWritable<KTP>;
+  lastFoundPropMapPath: KvasPathWritable<KTP['Key']>;
   lastFoundPropMapValue: KM;
-  curPath: KvasPathWritable<KTP>;
+  curPath: KvasPathWritable<KTP['Key']>;
 };
 
 export abstract class KvasMapOperations<
@@ -219,7 +219,7 @@ export abstract class KvasMapOperations<
 
   queryPath(
     map: KM,
-    path: KvasPath<KTP>,
+    path: KvasPath<KTP['Key']>,
   ): KvasSyncOrPromiseResult<KvasMapOperationsQueryResult<KTP, KM>> {
     const returnOnEmptyPath = (): KvasMapOperationsQueryResult<KTP, KM> => {
       const prop = {
@@ -377,7 +377,7 @@ export abstract class KvasMapOperations<
 
   deleteInPath(
     map: KM,
-    path: KvasPath<KTP>,
+    path: KvasPath<KTP['Key']>,
   ): KvasSyncOrPromiseResult<KvasMapOperationsDeleteResult> {
     const sync = () => {
       if (path.length === 0) {
@@ -465,7 +465,7 @@ export abstract class KvasMapOperations<
 
   getInPath(
     map: KM,
-    path: KvasPath<KTP>,
+    path: KvasPath<KTP['Key']>,
   ): KvasSyncOrPromiseResult<KvasMapOperationsGetResult<KTP, KM>> {
     const sync = () => {
       if (path.length === 0) {
@@ -519,7 +519,7 @@ export abstract class KvasMapOperations<
 
   setInPath(
     map: KM,
-    path: KvasPath<KTP>,
+    path: KvasPath<KTP['Key']>,
     value: KTP['PrimitiveValue'] | KM,
   ): KvasSyncOrPromiseResult<KvasMapOperationsSetResult> {
     const sync = () => {
@@ -550,7 +550,7 @@ export abstract class KvasMapOperations<
 
   getJSOInPath(
     map: KM,
-    path: KvasPath<KTP>,
+    path: KvasPath<KTP['Key']>,
   ): KvasSyncOrPromiseResult<
     KvasMapOperationsGetJSOInPathResult<KTP, JSO, KM>
   > {
@@ -610,7 +610,7 @@ export abstract class KvasMapOperations<
 
   setJSOInPath(
     map: KM,
-    path: KvasPath<KTP>,
+    path: KvasPath<KTP['Key']>,
     jso: JSO,
   ): KvasSyncOrPromiseResult<KvasMapOperationsSetJSOInPathResult> {
     const sync = () => {
@@ -639,7 +639,7 @@ export abstract class KvasMapOperations<
 
   pushInPath(
     map: KM,
-    path: KvasPath<KTP>,
+    path: KvasPath<KTP['Key']>,
     value: KTP['PrimitiveValue'] | KM,
   ): KvasSyncOrPromiseResult<KvasMapOperationsPushInPathResult<KTP>> {
     const sync = () => {
@@ -664,7 +664,7 @@ export abstract class KvasMapOperations<
 
   pushJSOInPath(
     map: KM,
-    path: KvasPath<KTP>,
+    path: KvasPath<KTP['Key']>,
     jso: JSO,
   ): KvasSyncOrPromiseResult<KvasMapOperationsPushJSOInPathResult<KTP>> {
     const sync = () => {
