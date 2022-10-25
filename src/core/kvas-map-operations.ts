@@ -393,11 +393,25 @@ export abstract class KvasMapOperations<
           found: false,
         };
       }
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      return lastFoundMapProp.value
-        .deleteKey(path[path.length - 1] as KTP['Key'])
-        .sync();
+      if (lastFoundMapProp.path.length === prop.path.length) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        const { prop } = this.queryPath(
+          map,
+          path.slice(0, path.length - 1),
+        ).sync();
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        return prop.value.deleteKey(path[path.length - 1] as KTP['Key']).sync();
+      } else if (lastFoundMapProp.path.length === prop.path.length - 1) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        return lastFoundMapProp.value
+          .deleteKey(path[path.length - 1] as KTP['Key'])
+          .sync();
+      } else {
+        throw new Error('deleteInPath::Should never happen');
+      }
     };
     const promise = async () => {
       if (path.length === 0) {

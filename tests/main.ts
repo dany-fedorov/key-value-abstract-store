@@ -6,6 +6,7 @@ import { jsonStringifySafe } from '@in-memory-json/kvas-in-memory-json-utils';
 
 const main = () => {
   const ds = KvasInMemoryJsonDataSource.createSyncDataSource();
+  ds.setJSO(['a', 'a'], 'value-0'); // JSO for JS Object
   ds.setJSO(['b', 0], 'value-1'); // JSO for JS Object
   ds.setJSO(['b', 1, 'c'], 'value-2');
   ds.setJSO(['b', 3, 'd', 'e', 1], 'value-2');
@@ -13,6 +14,8 @@ const main = () => {
   if (v instanceof KvasInMemoryJsonMap) {
     console.log(jsonStringifySafe((v as KvasEMapSyncMixin<JsonValue>).toJSO()));
   }
+  ds.delete(['a']);
+  console.log(jsonStringifySafe(ds.getJSO([])));
 };
 
 main();
