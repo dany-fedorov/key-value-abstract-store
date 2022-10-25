@@ -149,7 +149,7 @@ export class KvasInMemoryJsonMap<P extends JsonPrimitive> extends KvasMap<
       const found = Object.prototype.hasOwnProperty.call(this.host, key);
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
-      delete data[key];
+      delete this.host[key];
       return { found };
     };
     return {

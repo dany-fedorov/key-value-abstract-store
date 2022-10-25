@@ -1,6 +1,6 @@
 {
   "name": "key-value-abstract-store",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Very abstract nested key-value store for TypeScript.",
   "main": "./lib/index.js",
   "scripts": {
