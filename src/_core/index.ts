@@ -4,4 +4,4 @@ export * from './kvas-data-source-sync-container';
 export * from './kvas-errors';
 export * from './kvas-map';
 export * from './kvas-map-operations';
-export * from './kvas-types';
+export * from '../interfaces/kvas-util-types';

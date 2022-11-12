@@ -8,6 +8,9 @@
       "@core/*": [
         "core/*"
       ],
+      "@interfaces/*": [
+        "interfaces/*"
+      ],
       "@in-memory-json/*": [
         "implementations/in-memory-json/*"
       ]

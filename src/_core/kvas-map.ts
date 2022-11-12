@@ -3,7 +3,7 @@ import type {
   KvasSyncOrPromiseResult,
   KvasTypeParameters,
   KvasValueType,
-} from '@core/kvas-types';
+} from '../interfaces/kvas-util-types';
 import { KvasError } from '@core/kvas-errors';
 import type { KvasMapOperationsToObjectResult } from '@core/kvas-map-operations';
 

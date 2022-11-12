@@ -15,7 +15,10 @@ import type {
   KvasInMemoryJsonTypeParameters,
 } from '@in-memory-json/kvas-in-memory-json-map';
 import { KvasInMemoryJsonMap } from '@in-memory-json/kvas-in-memory-json-map';
-import type { KvasSyncOrPromiseResult, KvasSyncResult } from '@core/kvas-types';
+import type {
+  KvasSyncOrPromiseResult,
+  KvasSyncResult,
+} from '../../interfaces/kvas-util-types';
 import { jsonStringifySafe } from '@in-memory-json/kvas-in-memory-json-utils';
 
 export const PRIMITIVE_TYPEOF_TYPES = [

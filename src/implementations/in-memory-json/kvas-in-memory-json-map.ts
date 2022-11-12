@@ -3,7 +3,10 @@ import type {
   JsonCompositeUnconstrained,
   JsonPrimitive,
 } from '@in-memory-json/kvas-in-memory-json-types';
-import { KvasSyncOrPromiseResult, KvasValueType } from '@core/kvas-types';
+import {
+  KvasSyncOrPromiseResult,
+  KvasValueType,
+} from '../../interfaces/kvas-util-types';
 import { KvasError, KvasErrorConstructor } from '@core/kvas-errors';
 import { jsonStringifySafe } from '@in-memory-json/kvas-in-memory-json-utils';
 import {

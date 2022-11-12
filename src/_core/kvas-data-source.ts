@@ -14,7 +14,7 @@ import type {
   KvasPath,
   KvasSyncOrPromiseResult,
   KvasTypeParameters,
-} from '@core/kvas-types';
+} from '../interfaces/kvas-util-types';
 import { KvasError } from '@core/kvas-errors';
 
 export type KvasDataSourceGetResult<

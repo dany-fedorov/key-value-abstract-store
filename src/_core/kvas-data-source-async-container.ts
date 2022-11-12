@@ -13,7 +13,7 @@ import type {
   KvasPath,
   KvasSyncOrPromiseResult,
   KvasTypeParameters,
-} from '@core/kvas-types';
+} from '../interfaces/kvas-util-types';
 import type { KvasEMap, KvasEMapAsync } from '@core/kvas-map';
 import type { KvasMap } from '@core/kvas-map';
 

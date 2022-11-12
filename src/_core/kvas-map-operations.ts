@@ -12,8 +12,8 @@ import type {
   KvasSyncOrPromiseResult,
   KvasSyncResult,
   KvasTypeParameters,
-} from '@core/kvas-types';
-import { KvasValueType } from '@core/kvas-types';
+} from '../interfaces/kvas-util-types';
+import { KvasValueType } from '../interfaces/kvas-util-types';
 import { KvasError } from '@core/kvas-errors';
 
 // export type KvasMapOperationsToObjectResult<JSO> = {
@@ -177,24 +177,6 @@ async function inPathAsync<
   }
   return cb(curMap);
 }
-
-// /**
-//  * Optional abstract methods
-//  */
-// export interface KvasMapOperations<
-//   KTP extends KvasTypeParameters,
-//   KM extends KvasMap<KTP>,
-//   JSO,
-// > {
-//   fromJSO?(
-//     jso: JSO,
-//     ...rest: any[]
-//   ): KvasSyncOrPromiseResult<KvasMapOperationsFromJsResult<KTP, KM>>;
-//
-//   toJSO?(
-//     kvasMap: KM | KTP['PrimitiveValue'],
-//   ): KvasSyncOrPromiseResult<KvasMapOperationsToObjectResult<JSO>>;
-// }
 
 type KvasMapOperationsQueryPathState<
   KTP extends KvasTypeParameters,
