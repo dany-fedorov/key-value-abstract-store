@@ -1,8 +1,8 @@
-# Project status
+WIP
 
-The `in-memory-json` implementation should work for main cases.
+# Example
 
-See [example-1.ts](./tests/example-1.ts) (run with `npm run tsfile ./tests/example-1.ts`).
+[example-1.ts](./tests/example-1.ts) (run with `npm run tsfile ./tests/example-1.ts`).
 
 ```typescript
 import {KvasInMemoryJsonDataSource} from '@in-memory-json/kvas-in-memory-json-data-source';
