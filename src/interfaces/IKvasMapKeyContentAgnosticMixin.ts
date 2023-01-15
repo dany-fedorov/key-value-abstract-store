@@ -8,7 +8,7 @@ export type KvasMapDeleteKeyResult = {
   wasDeleted: boolean;
 };
 
-export type IKvasMapContentAgnosticMixin<KvasMapKey> = {
+export type IKvasMapKeyContentAgnosticMixin<KvasMapKey> = {
   deleteKey(key: KvasMapKey): KvasSyncOrPromiseResult<KvasMapDeleteKeyResult>;
 
   listKeys(): KvasSyncOrPromiseResult<KvasMapListKeysResult<KvasMapKey>>;

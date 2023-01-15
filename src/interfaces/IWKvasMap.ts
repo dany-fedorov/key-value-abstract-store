@@ -6,7 +6,7 @@ import type {
 import type { KvasValueType } from '@interfaces/kvas-util-types';
 import type { IWKvasPrimitive } from '@interfaces/IWKvasPrimitive';
 import type { IKvasWrapperMixin } from '@interfaces/IKvasWrapperMixin';
-import type { IKvasMapContentAgnosticMixin } from '@interfaces/IKvasMapContentAgnosticMixin';
+import type { IKvasMapKeyContentAgnosticMixin } from '@interfaces/IKvasMapKeyContentAgnosticMixin';
 
 export type WKvasValueResult<KvasMapKey, KvasPrimitiveJSO, KvasMapJSO> = {
   type: KvasValueType;
@@ -29,7 +29,7 @@ export type WKvasValue<KvasMapKey, KvasPrimitiveJSO, KvasMapJSO> =
 
 export type IWKvasMap<KvasMapKey, KvasPrimitiveJSO, KvasMapJSO> =
   IKvasWrapperMixin<KvasMapJSO> &
-    IKvasMapContentAgnosticMixin<KvasMapKey> & {
+    IKvasMapKeyContentAgnosticMixin<KvasMapKey> & {
       w_getKey(
         key: KvasMapKey,
       ): KvasSyncOrPromiseResult<
@@ -43,6 +43,6 @@ export type IWKvasMap<KvasMapKey, KvasPrimitiveJSO, KvasMapJSO> =
 
       w_push(
         value: WKvasValue<KvasMapKey, KvasPrimitiveJSO, KvasMapJSO>,
-        key: KvasMapKey,
+        key?: KvasMapKey,
       ): KvasSyncOrPromiseResult<WKvasMapPushResult<KvasMapKey>>;
     };

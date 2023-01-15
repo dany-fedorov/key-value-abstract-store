@@ -1,5 +1,5 @@
 import type { KvasValueType, KvasSyncOrPromiseResult } from './kvas-util-types';
-import type { IKvasMapContentAgnosticMixin } from '@interfaces/IKvasMapContentAgnosticMixin';
+import type { IKvasMapKeyContentAgnosticMixin } from '@interfaces/IKvasMapKeyContentAgnosticMixin';
 
 export type KvasValueResult<KvasPrimitiveJSO, KvasMapJSO> = {
   type: KvasValueType;
@@ -18,12 +18,12 @@ export type KvasMapPushResult<KvasMapKey> = {
   key: KvasMapKey;
 };
 
-export type IKvasMap<KvasMapKey, KvasPrimitiveJSO> =
-  IKvasMapContentAgnosticMixin<KvasMapKey> & {
+export type IKvasMap<KvasMapKey, KvasPrimitiveJSO, KvasMapJSO> =
+  IKvasMapKeyContentAgnosticMixin<KvasMapKey> & {
     getKey(
       key: KvasMapKey,
     ): KvasSyncOrPromiseResult<
-      KvasMapGetKeyResult<KvasMapKey, KvasPrimitiveJSO>
+      KvasMapGetKeyResult<KvasPrimitiveJSO, KvasMapJSO>
     >;
 
     setKey(
@@ -33,6 +33,6 @@ export type IKvasMap<KvasMapKey, KvasPrimitiveJSO> =
 
     push(
       value: KvasMapKey | KvasPrimitiveJSO,
-      key: KvasMapKey,
+      key?: KvasMapKey,
     ): KvasSyncOrPromiseResult<KvasMapPushResult<KvasMapKey>>;
   };
